@@ -1,0 +1,836 @@
+<!doctype html>
+<html lang="en" data-theme="obsidian">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000000">
+  <title>Still — Flip Clock</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #000;
+      color: #f3f2ef;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      --muted: #777773;
+      --line: #222220;
+      --panel: #111110;
+      --page: #000;
+      --foreground: #f3f2ef;
+      --subtle: #777773;
+      --edge: #252523;
+      --input-bg: #0c0c0b;
+      --input-fg: #e9e8e3;
+      --segment-bg: #080808;
+      --segment-edge: #1d1d1b;
+      --segment-active: #20201e;
+      --segment-active-edge: #30302d;
+      --digit-bg: linear-gradient(110deg, #171716, #10100f 54%, #171716);
+      --face-bg: linear-gradient(105deg, #1a1a19, #121211 55%, #191918);
+      --digit-ink: #efeee9;
+      --seam: #050505;
+      --tile-shadow: inset 1px 0 1px #ffffff08, inset -1px 0 1px #000, 0 2px 3px #000, 0 12px 26px #0009;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      background: var(--page);
+      color: var(--foreground);
+    }
+
+    button, input { font: inherit; }
+    button { color: inherit; }
+
+    .app-shell {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      min-height: 100vh;
+      flex-direction: column;
+      padding: 34px clamp(20px, 5vw, 72px) 28px;
+    }
+
+    .topbar, .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .topbar-tools {
+      display: flex;
+      align-items: center;
+      gap: 23px;
+    }
+
+    .theme-picker {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: #777773;
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .theme-picker select {
+      max-width: 142px;
+      padding: 8px 26px 8px 10px;
+      border: 1px solid var(--edge);
+      border-radius: 6px;
+      outline: none;
+      background: var(--input-bg);
+      color: var(--input-fg);
+      cursor: pointer;
+      font-size: 11px;
+      letter-spacing: .02em;
+      text-transform: none;
+    }
+
+    .theme-picker select:focus { border-color: var(--subtle); }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      color: var(--foreground);
+      font-size: 13px;
+      font-weight: 550;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .brand-mark {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #d7d4cb;
+      box-shadow: 0 0 12px #d7d4cb55;
+    }
+
+    .hint, .footer-note {
+      color: var(--subtle);
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .workspace {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 35px 0;
+    }
+
+    .mode-tabs {
+      position: relative;
+      display: grid;
+      width: min(402px, calc(100vw - 32px));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      padding: 4px;
+      border: 1px solid var(--segment-edge);
+      border-radius: 9px;
+      background: var(--segment-bg);
+      isolation: isolate;
+      overflow: hidden;
+    }
+
+    .mode-indicator {
+      position: absolute;
+      z-index: -1;
+      top: 4px;
+      bottom: 4px;
+      left: 4px;
+      width: calc((100% - 8px) / 3);
+      border: 1px solid var(--segment-active-edge);
+      border-radius: 7px;
+      background: var(--segment-active);
+      box-shadow: inset 0 1px #ffffff12, 0 2px 8px #0002;
+      transform: translateX(0);
+      transform: translateX(0);
+      transition: transform 620ms cubic-bezier(.22, 1, .36, 1), background-color 240ms ease, border-color 240ms ease;
+      pointer-events: none;
+    }
+
+    .mode-tab {
+      position: relative;
+      z-index: 1;
+      min-width: 0;
+      padding: 13px 15px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--subtle);
+      cursor: pointer;
+      font-size: 15px;
+      transition: color 280ms ease;
+    }
+
+    .mode-tab:hover { color: var(--foreground); }
+    .mode-tab[aria-pressed="true"] { color: var(--foreground); }
+
+    .clock-stage {
+      display: flex;
+      min-height: 0;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: clamp(45px, 9vh, 90px) 0 clamp(38px, 7vh, 72px);
+    }
+
+    .mode-caption {
+      min-height: 19px;
+      margin-bottom: 28px;
+      color: var(--subtle);
+      font-size: 11px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    .clock-display {
+      display: flex;
+      align-items: center;
+      gap: clamp(8px, 1.6vw, 22px);
+      filter: drop-shadow(0 20px 34px #000);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .digit-group {
+      display: flex;
+      gap: clamp(5px, .75vw, 10px);
+    }
+
+    .digit {
+      position: relative;
+      width: .72em;
+      height: 1.16em;
+      overflow: hidden;
+      border: 1px solid var(--edge);
+      border-radius: .085em;
+      background: var(--digit-bg);
+      box-shadow: var(--tile-shadow);
+      color: var(--digit-ink);
+      font-family: "Arial Narrow", "Roboto Condensed", "Helvetica Neue", sans-serif;
+      font-size: clamp(5.2rem, 18vw, 14rem);
+      font-weight: 300;
+      line-height: 1;
+      perspective: 700px;
+      text-align: center;
+    }
+
+    .digit::after {
+      position: absolute;
+      z-index: 5;
+      top: 50%;
+      right: 0;
+      left: 0;
+      height: 1px;
+      background: var(--seam);
+      box-shadow: 0 1px #ffffff0b;
+      content: "";
+    }
+
+    .half, .flap {
+      position: absolute;
+      right: 0;
+      left: 0;
+      display: flex;
+      height: 50%;
+      overflow: hidden;
+      align-items: center;
+      justify-content: center;
+      background: var(--face-bg);
+      backface-visibility: hidden;
+    }
+
+    .half span, .flap span {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 200%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.16em;
+    }
+
+    .upper { top: 0; border-radius: .08em .08em 0 0; }
+    .upper span, .flap-top span { top: 0; }
+    .lower { bottom: 0; border-radius: 0 0 .08em .08em; }
+    .lower span, .flap-bottom span { bottom: 0; }
+
+    .flap {
+      z-index: 3;
+      visibility: hidden;
+    }
+
+    .flap-top {
+      top: 0;
+      z-index: 4;
+      transform-origin: bottom;
+    }
+
+    .flap-bottom {
+      bottom: 0;
+      z-index: 2;
+      transform: rotateX(90deg);
+      transform-origin: top;
+    }
+
+    .digit.flipping .flap { visibility: visible; }
+    .digit.flipping .flap-top { animation: flip-away .28s cubic-bezier(.45, 0, .8, .25) forwards; }
+    .digit.flipping .flap-bottom { animation: flip-in .3s .25s cubic-bezier(.15, .7, .25, 1) forwards; }
+
+    @keyframes flip-away {
+      from { transform: rotateX(0); }
+      to { transform: rotateX(-90deg); }
+    }
+
+    @keyframes flip-in {
+      from { transform: rotateX(90deg); }
+      to { transform: rotateX(0); }
+    }
+
+    .separator {
+      align-self: center;
+      margin: 0 .01em;
+      color: var(--subtle);
+      font-size: clamp(3rem, 9vw, 7rem);
+      font-weight: 200;
+      line-height: 1;
+      transform: translateY(-.04em);
+    }
+
+    .control-panel {
+      display: flex;
+      min-height: 54px;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .duration-settings {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-right: 7px;
+    }
+
+    .duration-field {
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+      color: var(--subtle);
+      font-size: 11px;
+    }
+
+    .duration-field input {
+      width: 48px;
+      padding: 8px 7px;
+      border: 1px solid var(--edge);
+      border-radius: 6px;
+      outline: none;
+      background: var(--input-bg);
+      color: var(--input-fg);
+      text-align: center;
+    }
+
+    .duration-field input:focus { border-color: var(--subtle); }
+    .duration-field input:disabled { opacity: .48; }
+
+    .control-button {
+      min-width: 84px;
+      padding: 9px 15px;
+      border: 1px solid var(--edge);
+      border-radius: 6px;
+      background: var(--panel);
+      color: var(--foreground);
+      cursor: pointer;
+      font-size: 12px;
+      transition: background .18s ease, border-color .18s ease;
+    }
+
+    .control-button:hover {
+      border-color: var(--subtle);
+      background: var(--segment-active);
+    }
+
+    .control-button.primary {
+      border-color: #eceae3;
+      background: #eceae3;
+      color: #10100f;
+      font-weight: 600;
+    }
+
+    .control-button.primary:hover { background: #fff; }
+    .control-button.icon-button { display: grid; min-width: 38px; width: 38px; height: 38px; place-items: center; padding: 0; }
+    .icon-button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.5; }
+
+    .footer {
+      min-height: 20px;
+      color: var(--subtle);
+    }
+
+    .footer-note { letter-spacing: .06em; text-transform: none; }
+    .footer-key {
+      display: inline-flex;
+      min-width: 19px;
+      height: 19px;
+      align-items: center;
+      justify-content: center;
+      margin: 0 3px;
+      border: 1px solid var(--edge);
+      border-radius: 4px;
+      color: var(--subtle);
+      font-size: 10px;
+    }
+
+    .fullscreen-mode, .fullscreen-mode body { width: 100%; height: 100%; min-height: 100%; overflow: hidden; cursor: none; }
+    .fullscreen-mode .topbar,
+    .fullscreen-mode .footer,
+    .fullscreen-mode .mode-tabs,
+    .fullscreen-mode .mode-caption,
+    .fullscreen-mode .control-panel { display: none; }
+
+
+    @media (max-width: 620px) {
+      .app-shell { padding: 22px 16px; }
+      .hint { display: none; }
+      .topbar-tools { gap: 0; }
+      .theme-picker { gap: 6px; }
+      .theme-picker select { max-width: 118px; }
+      .mode-tab { min-width: 72px; padding: 9px 10px; }
+      .clock-stage { margin: 54px 0 42px; }
+      .digit { font-size: clamp(3rem, 17vw, 7rem); }
+      .clock-display { gap: 5px; }
+      .digit-group { gap: 3px; }
+      .separator { font-size: clamp(2.4rem, 9vw, 4rem); }
+      .control-panel { max-width: 100%; flex-wrap: wrap; }
+      .duration-settings { margin-right: 0; }
+      .control-button { min-width: 72px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; }
+      .digit.flipping .flap-top { animation-duration: .14s; }
+      .digit.flipping .flap-bottom { animation-duration: .14s; animation-delay: .12s; }
+      .mode-indicator, .mode-tab { transition-duration: .01ms; }
+    }
+
+    html[data-theme="light"] {
+      color-scheme: light;
+      --page: #e9eef5;
+      --foreground: #202b3b;
+      --subtle: #738096;
+      --edge: #c9d2df;
+      --input-bg: #f8faff;
+      --input-fg: #202b3b;
+      --segment-bg: #e0e7f0;
+      --segment-edge: #d3dce8;
+      --segment-active: #fff;
+      --segment-active-edge: #fff;
+      --digit-bg: linear-gradient(135deg, #f8fbff, #dce5ef 56%, #f5f8fc);
+      --face-bg: linear-gradient(105deg, #f8fbff, #e6ecf4 55%, #f6f9fd);
+      --digit-ink: #1d2735;
+      --seam: #c5ceda;
+      --tile-shadow: inset 1px 0 #ffffff, inset -1px 0 #cbd4df, 0 2px 3px #34455b20, 0 12px 26px #34455b18;
+      --panel: #f2f5f9;
+    }
+
+    html[data-theme="light"] .brand-mark { background: #556b88; box-shadow: 0 0 10px #556b8833; }
+    html[data-theme="light"] .mode-indicator { box-shadow: inset 0 1px #fff, 0 2px 8px #41536b18; }
+    html[data-theme="light"] .control-button.primary {
+      border-color: #27374c;
+      background: #27374c;
+      color: #fff;
+    }
+    html[data-theme="light"] .control-button.primary:hover { background: #384b63; }
+    html[data-theme="light"] .digit::after { box-shadow: 0 1px #fff9; }
+
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"></span><span>Still</span></div>
+      <div class="topbar-tools">
+        <div class="hint">A little more present</div>
+        <label class="theme-picker" for="theme-selector">
+          <span>Atmosphere</span>
+          <select id="theme-selector" aria-label="Choose a clock theme">
+            <option value="obsidian">Obsidian</option>
+            <option value="light">Light</option>
+          </select>
+        </label>
+      </div>
+    </header>
+
+    <section class="workspace" aria-label="Flip clock">
+      <nav class="mode-tabs" aria-label="Clock mode">
+        <span class="mode-indicator" aria-hidden="true"></span>
+        <button class="mode-tab" type="button" data-mode="clock" aria-pressed="true">Clock</button>
+        <button class="mode-tab" type="button" data-mode="timer" aria-pressed="false">Timer</button>
+        <button class="mode-tab" type="button" data-mode="pomodoro" aria-pressed="false">Pomodoro</button>
+      </nav>
+
+      <div class="clock-stage">
+        <div class="mode-caption" id="mode-caption">Local time</div>
+        <div class="clock-display" id="clock-display" role="timer" aria-label="Current time"></div>
+      </div>
+
+      <div class="control-panel" id="control-panel"></div>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-note">Made for the quiet moments</div>
+      <div class="footer-note">Press <span class="footer-key">F</span> for fullscreen</div>
+    </footer>
+  </main>
+  <script>
+    (() => {
+      const display = document.getElementById("clock-display");
+      const caption = document.getElementById("mode-caption");
+      const panel = document.getElementById("control-panel");
+      const themeSelector = document.getElementById("theme-selector");
+      const modeIndicator = document.querySelector(".mode-indicator");
+      const themeColor = document.querySelector('meta[name="theme-color"]');
+      const modeButtons = [...document.querySelectorAll(".mode-tab")];
+      const state = {
+        mode: "clock",
+        timerConfig: { hours: 0, minutes: 25, seconds: 0 },
+        pomConfig: { work: 25, short: 5, long: 15 },
+        timerRemaining: 25 * 60,
+        timerDeadline: null,
+        pomRemaining: 25 * 60,
+        pomDeadline: null,
+        pomPhase: "Work",
+        workSessions: 0,
+        fullscreen: false
+      };
+
+      const safeInt = (input, fallback = 0) => {
+        const value = Number.parseInt(input.value, 10);
+        return Number.isFinite(value) ? Math.max(0, value) : fallback;
+      };
+
+      function bindDigit(digit) {
+        digit.querySelector(".flap-bottom").addEventListener("animationend", event => {
+          if (event.animationName !== "flip-in") return;
+          const next = digit.dataset.target;
+          const lower = digit.querySelector(".half.lower span");
+          lower.textContent = next;
+          digit.dataset.value = next;
+          digit.classList.remove("flipping");
+        });
+      }
+
+      function makeDigit() {
+        const digit = document.createElement("div");
+        digit.className = "digit";
+        digit.innerHTML = '<div class="half upper"><span></span></div><div class="half lower"><span></span></div><div class="flap flap-top"><span></span></div><div class="flap flap-bottom"><span></span></div>';
+        bindDigit(digit);
+        return digit;
+      }
+
+      const groups = [];
+      for (let groupIndex = 0; groupIndex < 3; groupIndex++) {
+        const group = document.createElement("div");
+        group.className = "digit-group";
+        const digits = [makeDigit(), makeDigit()];
+        digits.forEach(digit => group.append(digit));
+        groups.push(digits);
+        display.append(group);
+        if (groupIndex < 2) {
+          const separator = document.createElement("div");
+          separator.className = "separator";
+          separator.textContent = ":";
+          separator.setAttribute("aria-hidden", "true");
+          display.append(separator);
+        }
+      }
+      function finishFlip(digit) {
+        const next = digit.dataset.target;
+        const [upper, lower] = digit.querySelectorAll(".half span");
+        upper.textContent = next;
+        lower.textContent = next;
+        digit.dataset.value = next;
+        digit.classList.remove("flipping");
+      }
+
+      function paintDigit(digit, value) {
+        if (digit.classList.contains("flipping")) {
+          if (digit.dataset.target === value) return;
+          finishFlip(digit);
+        }
+        const [upper, lower, top, bottom] = digit.querySelectorAll("span");
+        const old = digit.dataset.value || "";
+        if (old === value) return;
+        digit.dataset.target = value;
+        if (!old) {
+          upper.textContent = value;
+          lower.textContent = value;
+          digit.dataset.value = value;
+          return;
+        }
+        top.textContent = old || value;
+        upper.textContent = value;
+        bottom.textContent = value;
+        digit.classList.add("flipping");
+      }
+
+      function renderDigits(totalSeconds) {
+        const time = Math.max(0, Math.floor(totalSeconds));
+        const hours = Math.floor(time / 3600) % 100;
+        const minutes = Math.floor(time / 60) % 60;
+        const seconds = time % 60;
+        const values = `${String(hours).padStart(2, "0")}${String(minutes).padStart(2, "0")}${String(seconds).padStart(2, "0")}`;
+        for (let index = 0; index < 6; index++) {
+          const value = values[index];
+          paintDigit(groups[Math.floor(index / 2)][index % 2], value);
+        }
+      }
+
+      function fields(items) {
+        return `<div class="duration-settings">${items.map(({ key, label, value, max }) => `
+          <label class="duration-field"><input type="number" inputmode="numeric" min="0" max="${max}" step="1" value="${value}" data-duration="${key}" aria-label="${label}">${label}</label>
+        `).join("")}</div>`;
+      }
+
+      function controls() {
+        if (state.mode === "clock") {
+          panel.innerHTML = `<button class="control-button icon-button" type="button" data-action="fullscreen" aria-label="Enter fullscreen" title="Fullscreen (F)">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3H3v4M13 3h4v4M17 13v4h-4M7 17H3v-4"/></svg>
+          </button>`;
+          caption.textContent = "Local time";
+          display.setAttribute("aria-label", "Current local time");
+          return;
+        }
+        const active = state.mode === "timer" ? state.timerDeadline !== null : state.pomDeadline !== null;
+        const pauseLabel = active ? "Pause" : "Start";
+        const resetLabel = "Reset";
+        let settings = "";
+        if (state.mode === "timer") {
+          settings = fields([
+            { key: "hours", label: "h", value: state.timerConfig.hours, max: 99 },
+            { key: "minutes", label: "m", value: state.timerConfig.minutes, max: 59 },
+            { key: "seconds", label: "s", value: state.timerConfig.seconds, max: 59 }
+          ]);
+        } else {
+          settings = fields([
+            { key: "work", label: "work", value: state.pomConfig.work, max: 180 },
+            { key: "short", label: "short", value: state.pomConfig.short, max: 60 },
+            { key: "long", label: "long", value: state.pomConfig.long, max: 90 }
+          ]);
+        }
+        panel.innerHTML = `${settings}<div class="control-group">
+          <button class="control-button primary" type="button" data-action="toggle">${pauseLabel}</button>
+          <button class="control-button" type="button" data-action="reset">${resetLabel}</button>
+          <button class="control-button icon-button" type="button" data-action="fullscreen" aria-label="Enter fullscreen" title="Fullscreen (F)">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3H3v4M13 3h4v4M17 13v4h-4M7 17H3v-4"/></svg>
+          </button>
+        </div>`;
+        for (const input of panel.querySelectorAll("input")) input.disabled = active;
+        caption.textContent = state.mode === "timer" ? "Countdown" : `${state.pomPhase} · ${state.pomPhase === "Work" ? `Session ${state.workSessions + 1}` : "Take a breath"}`;
+        display.setAttribute("aria-label", state.mode === "timer" ? "Timer countdown" : `${state.pomPhase} countdown`);
+      }
+
+      function durationFromInputs() {
+        const { hours, minutes, seconds } = state.timerConfig;
+        return hours * 3600 + minutes * 60 + seconds;
+      }
+
+      function currentPomDuration() {
+        const key = state.pomPhase === "Work" ? "work" : state.pomPhase === "Short break" ? "short" : "long";
+        return state.pomConfig[key] * 60;
+      }
+
+      function updateCaption() {
+        if (state.mode === "pomodoro") {
+          caption.textContent = `${state.pomPhase} · ${state.pomPhase === "Work" ? `Session ${state.workSessions + 1}` : "Take a breath"}`;
+          display.setAttribute("aria-label", `${state.pomPhase} countdown`);
+        }
+      }
+
+      function pauseActiveMode() {
+        if (state.mode === "timer" && state.timerDeadline !== null) {
+          state.timerRemaining = Math.max(0, Math.ceil((state.timerDeadline - Date.now()) / 1000));
+          state.timerDeadline = null;
+        }
+        if (state.mode === "pomodoro" && state.pomDeadline !== null) {
+          state.pomRemaining = Math.max(0, Math.ceil((state.pomDeadline - Date.now()) / 1000));
+          state.pomDeadline = null;
+        }
+      }
+
+      function setMode(mode) {
+        if (mode === state.mode) return;
+        pauseActiveMode();
+        state.mode = mode;
+        modeButtons.forEach(button => button.setAttribute("aria-pressed", String(button.dataset.mode === mode)));
+        controls();
+        updateDisplay();
+      }
+
+      function updateDisplay() {
+        if (state.mode === "clock") {
+          const now = new Date();
+          renderDigits(now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds());
+          return;
+        }
+        const remaining = state.mode === "timer" ? state.timerRemaining : state.pomRemaining;
+        renderDigits(remaining);
+      }
+
+      function tick() {
+        const now = Date.now();
+        if (state.mode === "clock") {
+          const current = new Date();
+          renderDigits(current.getHours() * 3600 + current.getMinutes() * 60 + current.getSeconds());
+          return;
+        }
+        if (state.mode === "timer" && state.timerDeadline !== null) {
+          state.timerRemaining = Math.max(0, Math.ceil((state.timerDeadline - now) / 1000));
+          if (state.timerRemaining === 0) {
+            state.timerDeadline = null;
+            controls();
+          }
+        } else if (state.mode === "pomodoro" && state.pomDeadline !== null) {
+          state.pomRemaining = Math.max(0, Math.ceil((state.pomDeadline - now) / 1000));
+          if (state.pomRemaining === 0) {
+            if (state.pomPhase === "Work") {
+              state.workSessions++;
+              state.pomPhase = state.workSessions % 4 === 0 ? "Long break" : "Short break";
+            } else {
+              state.pomPhase = "Work";
+            }
+            state.pomRemaining = currentPomDuration();
+            state.pomDeadline = Date.now() + state.pomRemaining * 1000;
+            controls();
+          }
+          updateCaption();
+        }
+        updateDisplay();
+      }
+
+      function toggleTimer() {
+        if (state.timerDeadline !== null) {
+          pauseActiveMode();
+        } else {
+          if (state.timerRemaining === 0) state.timerRemaining = durationFromInputs();
+          if (state.timerRemaining > 0) state.timerDeadline = Date.now() + state.timerRemaining * 1000;
+        }
+        controls();
+        updateDisplay();
+      }
+
+      function resetTimer() {
+        state.timerDeadline = null;
+        state.timerRemaining = durationFromInputs();
+        controls();
+        updateDisplay();
+      }
+
+      function togglePomodoro() {
+        if (state.pomDeadline !== null) {
+          pauseActiveMode();
+        } else {
+          if (state.pomRemaining <= 0) state.pomRemaining = currentPomDuration();
+          state.pomDeadline = Date.now() + state.pomRemaining * 1000;
+        }
+        controls();
+        updateDisplay();
+      }
+
+      function resetPomodoro() {
+        state.pomDeadline = null;
+        state.pomPhase = "Work";
+        state.workSessions = 0;
+        state.pomRemaining = currentPomDuration();
+        controls();
+        updateDisplay();
+      }
+
+      function enterFullscreen() {
+        if (state.fullscreen) return;
+        state.fullscreen = true;
+        document.documentElement.classList.add("fullscreen-mode");
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(() => {
+            // The CSS fullscreen view remains available if native fullscreen is denied.
+          });
+        }
+      }
+
+      function exitFullscreen() {
+        state.fullscreen = false;
+        document.documentElement.classList.remove("fullscreen-mode");
+        if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+      }
+
+      modeButtons.forEach((button, index) => button.addEventListener("click", () => {
+        modeIndicator.style.transform = `translateX(${index * 100}%)`;
+        setMode(button.dataset.mode);
+      }));
+      panel.addEventListener("click", event => {
+        const action = event.target.closest("[data-action]")?.dataset.action;
+        if (action === "fullscreen") enterFullscreen();
+        if (action === "toggle") state.mode === "timer" ? toggleTimer() : togglePomodoro();
+        if (action === "reset") state.mode === "timer" ? resetTimer() : resetPomodoro();
+      });
+      panel.addEventListener("change", event => {
+        const input = event.target.closest("[data-duration]");
+        if (!input) return;
+        const max = Number(input.max);
+        input.value = String(Math.min(max, Math.max(0, safeInt(input))));
+        if (state.mode === "timer") {
+          state.timerConfig[input.dataset.duration] = safeInt(input);
+          state.timerRemaining = durationFromInputs();
+        } else {
+          state.pomConfig[input.dataset.duration] = safeInt(input);
+          state.pomRemaining = currentPomDuration();
+        }
+        updateDisplay();
+      });
+      themeSelector.addEventListener("change", () => {
+        document.documentElement.dataset.theme = themeSelector.value;
+        const isLight = themeSelector.value === "light";
+        document.documentElement.style.colorScheme = isLight ? "light" : "dark";
+        themeColor.content = isLight ? "#e9eef5" : "#000000";
+      });
+      document.addEventListener("keydown", event => {
+        if (event.altKey || event.ctrlKey || event.metaKey) return;
+        if (event.key.toLowerCase() === "f" && !event.target.matches("input, textarea, select")) {
+          event.preventDefault();
+          state.fullscreen ? exitFullscreen() : enterFullscreen();
+        } else if (event.key === "Escape" && state.fullscreen) {
+          exitFullscreen();
+        }
+      });
+      document.addEventListener("fullscreenchange", () => {
+        if (!document.fullscreenElement) {
+          state.fullscreen = false;
+          document.documentElement.classList.remove("fullscreen-mode");
+        }
+      });
+
+      controls();
+      tick();
+      window.setInterval(tick, 200);
+    })();
+  </script>
+</body>
+</html>
