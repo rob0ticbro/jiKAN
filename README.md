@@ -2,9 +2,13 @@
 
 HOUR is a quiet, offline-first flip clock and focus timer for Linux. The same dependency-free website also runs directly in a modern browser.
 
-![HOUR desktop interface](screenshots/hour-desktop.png)
+## Vibe Coded
 
-HOUR is a personal project, shared as-is under the GNU GPL version 3. Contributions and forks are welcome.
+HOUR is a vibe-coded project, developed primarily with AI assistance. I provided the idea, direction, prompts, testing, and decisions, while AI tools generated and modified much of the code.
+
+This is my first open-source project. It is shared as-is under the GNU GPL-3.0 license. Contributions, code review, bug reports, and forks are welcome.
+
+![HOUR desktop interface](screenshots/hour-desktop.png)
 
 ## Features
 
