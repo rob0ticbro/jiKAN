@@ -13,8 +13,8 @@ function createWindow() {
     minHeight: 480,
     backgroundColor: "#000000",
     autoHideMenuBar: true,
-    title: "HOUR — 時間 (Jikan)",
-    icon: path.join(__dirname, "assets", "hour.png"),
+    title: "jiKAN — 時計",
+    icon: path.join(__dirname, "assets", "jikan.png"),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,

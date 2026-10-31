@@ -1,11 +1,11 @@
 {
-  "name": "hour-jikan",
-  "version": "1.0.0",
+  "name": "jikan",
+  "version": "1.1.0",
   "license": "GPL-3.0-only",
   "private": true,
-  "author": "HOUR contributors",
-  "desktopName": "HOUR",
-  "description": "HOUR — 時間 (Jikan), an offline flip clock and focus timer for Linux",
+  "author": "jiKAN contributors",
+  "desktopName": "jiKAN",
+  "description": "jiKAN — 時計, an offline flip clock and focus timer for Linux",
   "scripts": {
     "app:dev": "electron .",
     "app:build": "electron-builder --linux AppImage"
@@ -13,8 +13,8 @@
   "main": "main.cjs",
   "build": {
     "appId": "app.hour.jikan",
-    "productName": "HOUR",
-    "artifactName": "HOUR-${version}-${arch}.${ext}",
+    "productName": "jiKAN",
+    "artifactName": "jiKAN-${version}-${arch}.${ext}",
     "directories": {
       "output": "release"
     },
@@ -31,7 +31,7 @@
         "AppImage"
       ],
       "category": "Utility",
-      "icon": "assets/hour.png",
+      "icon": "assets/jikan.png",
       "synopsis": "Offline flip clock and focus timer",
       "description": "A local flip clock, countdown, and Pomodoro timer with custom themes and an in-app screensaver."
     }
