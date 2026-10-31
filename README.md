@@ -70,18 +70,9 @@ The generated `release/` directory, AppImages, `node_modules/`, and `dist/` are 
 
 There are no third-party frontend libraries or remote assets. The desktop shell uses Electron and Chromium under their respective upstream licenses. The included HOUR icon is original project artwork.
 
-## Publish your own GitHub repository
+## Source code
 
-Create an empty public repository on GitHub (for example, `hour-jikan`), then connect and push this source repository:
-
-```sh
-git remote add origin https://github.com/YOUR-USERNAME/hour-jikan.git
-git add .
-git commit -m "Prepare HOUR 1.0.0 release"
-git push -u origin main
-```
-
-Create a GitHub Release for the `v1.0.0` tag and attach `release/HOUR-1.0.0-x86_64.AppImage`. GitHub provides source archives for the tag automatically. See [RELEASE_NOTES.md](RELEASE_NOTES.md) for the release summary.
+The source code and build instructions are maintained in the [rob0ticbro/HOUR repository](https://github.com/rob0ticbro/HOUR). Clone it and follow the instructions above to run or build HOUR.
 
 ## License
 
