@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="obsidian">
+<html lang="en" data-theme="obsidian" class="is-loading">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -61,6 +61,138 @@
       padding: 34px clamp(20px, 5vw, 72px) 28px;
     }
 
+    html.is-loading .app-shell { opacity: 0; pointer-events: none; }
+    html.is-loading .brand { visibility: hidden; }
+    .loading-screen {
+      position: fixed;
+      z-index: 1000;
+      inset: 0;
+      display: grid;
+      overflow: hidden;
+      place-items: center;
+      background: #000;
+      opacity: 1;
+    }
+
+    .loading-screen.exiting {
+      background: transparent;
+      pointer-events: none;
+      transition: background-color 760ms ease;
+    }
+
+    .loading-content {
+      display: grid;
+      justify-items: center;
+      gap: 27px;
+      width: 100%;
+      padding: 24px;
+    }
+
+    .logo-loading-card {
+      position: relative;
+      isolation: isolate;
+      display: grid;
+      width: min(390px, calc(100vw - 48px));
+      aspect-ratio: 2.45;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid transparent;
+      border-radius: 24px;
+      background:
+        linear-gradient(#0b0b0d, #0b0b0d) padding-box,
+        conic-gradient(from 25deg, #ff3b8d, #ffb643, #f8ff65, #52f7bb, #4aaaff, #b45bff, #ff3b8d) border-box;
+      box-shadow: 0 0 38px #8655ff35, 0 22px 75px #000b, inset 0 1px #ffffff18;
+      color: #f7f4ff;
+      transform-origin: top left;
+      will-change: transform, opacity;
+    }
+
+    .logo-loading-card::before {
+      position: absolute;
+      z-index: -1;
+      inset: -35%;
+      background: conic-gradient(from 0deg, #ff3b8d55, #ffb64342, #f8ff6540, #52f7bb48, #4aaaff55, #b45bff58, #ff3b8d55);
+      content: "";
+      filter: blur(28px);
+      opacity: .8;
+      animation: logo-card-rainbow 5.2s linear infinite;
+    }
+
+    .logo-loading-card::after {
+      position: absolute;
+      z-index: 2;
+      inset: -45% auto -45% -45%;
+      width: 38%;
+      background: linear-gradient(90deg, transparent, #ffffff08 18%, #ffffffb8 50%, #f5d5ffb3 58%, #ffffff08 82%, transparent);
+      content: "";
+      filter: blur(7px);
+      mix-blend-mode: screen;
+      transform: translateX(-190%) skewX(-17deg);
+      animation: logo-card-shine 1.65s cubic-bezier(.22, .62, .32, 1) infinite;
+      pointer-events: none;
+    }
+
+    .logo-loading-face {
+      display: flex;
+      align-items: baseline;
+      gap: 13px;
+      padding: 22px;
+      font-size: clamp(36px, 9vw, 62px);
+      font-weight: 720;
+      letter-spacing: .035em;
+      text-shadow: 0 2px 22px #ffffff30, 0 0 35px #ae73ff55;
+    }
+
+    .logo-loading-face small {
+      color: #d3cae4;
+      font-size: .37em;
+      font-weight: 400;
+      letter-spacing: .1em;
+    }
+
+    .loading-label {
+      color: #aaa5b7;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .24em;
+      text-transform: uppercase;
+      animation: loading-label-pulse 1.7s ease-in-out infinite;
+    }
+
+    .loading-label.is-hidden { visibility: hidden; opacity: 0; animation: none; }
+
+    .app-shell.startup-enter .topbar-actions,
+    .app-shell.startup-enter .workspace {
+      animation: startup-rise 680ms cubic-bezier(.22, 1, .36, 1) both;
+    }
+
+    .app-shell.startup-enter .topbar-actions { animation-delay: 80ms; }
+    .app-shell.startup-enter .workspace { animation-delay: 135ms; }
+
+    @keyframes logo-card-shine {
+      0% { transform: translateX(-190%) skewX(-17deg); }
+      100% { transform: translateX(470%) skewX(-17deg); }
+    }
+
+    @keyframes logo-card-rainbow {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes loading-label-pulse {
+      0%, 100% { opacity: .55; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes startup-rise {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 620px) {
+      .logo-loading-card { border-radius: 19px; }
+      .loading-content { gap: 22px; }
+    }
+
     .topbar {
       display: flex;
       align-items: center;
@@ -90,9 +222,13 @@
       font-weight: 650;
       letter-spacing: .04em;
       text-transform: none;
-      cursor: default;
+      border: 0;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
       transition: transform .24s ease, color .24s ease, text-shadow .24s ease;
     }
+    .brand:focus-visible { outline: 1px solid var(--theme-accent); outline-offset: 5px; }
 
     .brand::before, .brand::after {
       position: absolute;
@@ -143,6 +279,212 @@
     .brand:hover small { color: var(--foreground); }
     .topbar-actions { display: flex; align-items: center; gap: 12px; }
     .topbar-actions .control-button { min-width: 0; }
+
+    .about-dialog {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      width: 100vw;
+      height: 100vh;
+      max-width: none;
+      max-height: none;
+      place-items: center;
+      margin: 0;
+      padding: 0;
+      overflow: visible;
+      border: 0;
+      background: transparent;
+      color: var(--foreground);
+    }
+    .about-dialog:not([open]) { display: none; }
+    .about-dialog[open] { display: grid; }
+
+    .about-dialog::backdrop {
+      background: #000c;
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      animation: about-backdrop-in 360ms ease both;
+    }
+
+    .about-dialog.closing::backdrop {
+      animation: about-backdrop-out 420ms ease both;
+    }
+
+    .about-card {
+      position: relative;
+      display: flex;
+      width: min(390px, 84vw, 56vh);
+      aspect-ratio: 5 / 7;
+      flex-direction: column;
+      align-items: stretch;
+      padding: clamp(20px, 5vw, 28px);
+      overflow: hidden;
+      border: 1px solid color-mix(in srgb, var(--theme-accent) 30%, #ffffff12);
+      border-radius: clamp(22px, 6vw, 30px);
+      background: color-mix(in srgb, var(--panel) 94%, #fff 6%);
+      box-shadow: 0 34px 100px #000c, inset 0 1px #ffffff18;
+      cursor: default;
+      -webkit-user-select: none;
+      user-select: none;
+      transform: perspective(1100px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)) translate3d(var(--lift-x, 0px), var(--lift-y, 0px), 0);
+      transform-origin: center;
+      transform-style: preserve-3d;
+      transition: transform 160ms cubic-bezier(.2, .7, .2, 1), box-shadow 220ms ease;
+      will-change: transform, opacity;
+    }
+
+    .about-card * { cursor: default; -webkit-user-select: none; user-select: none; }
+    .about-card button { cursor: pointer; }
+
+    .about-card::before {
+      position: absolute;
+      z-index: 1;
+      inset: -45% -70%;
+      background: linear-gradient(105deg, transparent 45%, #ffffff00 48%, #ffffff24 52%, #ffffff00 56%, transparent 60%);
+      content: "";
+      pointer-events: none;
+      animation: about-card-shine 7s ease-in-out infinite;
+    }
+
+    .about-card::after {
+      position: absolute;
+      z-index: 2;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(ellipse at var(--shine-x, 50%) var(--shine-y, 30%), color-mix(in srgb, var(--foreground) 15%, transparent), transparent 55%);
+      content: "";
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease;
+    }
+
+    .about-card > * {
+      z-index: 3;
+      transform: translateZ(18px);
+    }
+
+    .about-dialog[data-tilting="true"] .about-card::after { opacity: 1; }
+    .about-dialog[data-tilting="true"] .about-card { box-shadow: 0 42px 110px #000d, inset 0 1px #ffffff20, 0 0 54px color-mix(in srgb, var(--theme-accent) 16%, transparent); }
+
+    .about-brand {
+      position: relative;
+      display: grid;
+      justify-items: center;
+      gap: 7px;
+      padding: clamp(22px, 7vh, 42px) 8px 18px;
+      border-bottom: 1px solid color-mix(in srgb, var(--edge) 80%, transparent);
+      text-align: center;
+    }
+
+    .about-brand h2 {
+      margin: 0;
+      color: var(--foreground);
+      font-size: clamp(36px, 9vw, 52px);
+      font-weight: 680;
+      letter-spacing: .045em;
+      line-height: 1;
+      text-shadow: 0 0 28px color-mix(in srgb, var(--theme-accent) 28%, transparent);
+    }
+
+    .about-brand span {
+      color: var(--subtle);
+      font-size: 11px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+
+    .about-versions {
+      position: relative;
+      display: grid;
+      gap: 15px;
+      padding: 26px 2px;
+    }
+
+    .about-version {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--subtle);
+      font-size: 13px;
+    }
+
+    .about-version strong {
+      color: var(--foreground);
+      font-size: 13px;
+      font-weight: 550;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .about-update-area { position: relative; margin-top: auto; }
+    .about-update-button {
+      width: 100%;
+      min-height: 46px;
+      justify-content: center;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 570;
+    }
+
+    .about-update-status {
+      min-height: 34px;
+      margin: 12px 2px 0;
+      color: var(--subtle);
+      font-size: 11px;
+      line-height: 1.55;
+      text-align: center;
+    }
+
+    .about-progress {
+      height: 2px;
+      margin: 10px 4px 0;
+      overflow: hidden;
+      border-radius: 99px;
+      background: color-mix(in srgb, var(--edge) 78%, transparent);
+    }
+
+    .about-progress[hidden] { display: none; }
+    .about-progress span {
+      display: block;
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--theme-accent);
+      box-shadow: 0 0 12px var(--theme-accent);
+      transition: width 180ms ease;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .about-card { transition-duration: 0ms; }
+      .about-card::before { animation: none; }
+      .about-dialog::backdrop,
+      .about-dialog.closing::backdrop { animation-duration: .01ms; }
+    }
+
+    @keyframes about-backdrop-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes about-backdrop-out {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    @keyframes about-card-shine {
+      0%, 68% { transform: translateX(-55%) rotate(12deg); opacity: 0; }
+      72% { opacity: .8; }
+      88% { opacity: .8; }
+      100% { transform: translateX(55%) rotate(12deg); opacity: 0; }
+    }
+
+    html.theme-switching body,
+    html.theme-switching .digit,
+    html.theme-switching .half,
+    html.theme-switching .flap,
+    html.theme-switching .clock-display {
+      transition: none !important;
+    }
 
     .settings-toggle.control-button.icon-button { min-width: 48px; width: 48px; height: 48px; }
     .settings-toggle.control-button.icon-button svg { width: 26px; height: 26px; overflow: visible; }
@@ -1222,6 +1564,25 @@
     }
     .saver-settings label + label { border-top: 1px solid color-mix(in srgb, var(--edge) 72%, transparent); }
     .saver-settings select { width: min(220px, 52%); }
+    .sound-setting-row {
+      display: flex;
+      min-height: 54px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      color: var(--subtle);
+      font-size: 13px;
+    }
+    .sound-setting-row + .sound-setting-row { border-top: 1px solid color-mix(in srgb, var(--edge) 72%, transparent); }
+    .sound-control { display: flex; width: min(250px, 55%); align-items: center; gap: 12px; }
+    .sound-control input[type="range"] { width: auto; min-width: 0; flex: 1; }
+    .sound-control output {
+      min-width: 43px;
+      color: var(--foreground);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
     .custom-select-wrap { position: relative; flex: 0 1 min(220px, 52%); min-width: 0; }
     .theme-form .custom-select-wrap { flex-basis: min(250px, 58%); }
     .custom-select-wrap > select { display: none; }
@@ -1467,11 +1828,19 @@
   </style>
 </head>
 <body>
+  <div class="loading-screen" id="loading-screen" aria-live="polite">
+    <div class="loading-content">
+      <div class="logo-loading-card" id="loading-logo-card" aria-label="jiKAN logo card">
+        <div class="logo-loading-face"><span>jiKAN</span><small>時計</small></div>
+      </div>
+      <div class="loading-label">App loading</div>
+    </div>
+  </div>
   <main class="app-shell">
     <header class="topbar">
-      <div class="brand" aria-label="jiKAN">
+      <button class="brand" id="about-trigger" type="button" aria-label="About jiKAN and updates">
         <span>jiKAN</span><small>時計</small>
-      </div>
+      </button>
       <div class="topbar-actions">
         <div class="theme-switcher" role="group" aria-label="Color theme">
           <button class="theme-arrow" type="button" data-theme-step="-1" aria-label="Previous theme">
@@ -1601,8 +1970,45 @@
             <p class="setting-description">The screensaver shows the current clock or timer. Press Escape or move the pointer to exit.</p>
           </div>
         </section>
+        <section class="editor-section" aria-label="Sound settings">
+          <h3>Sound</h3>
+          <div class="saver-settings">
+            <label class="sound-setting-row" for="ui-sounds">
+              <span>UI sound volume</span>
+              <span class="sound-control">
+                <input id="ui-sounds" type="range" min="0" max="100" step="1" value="60">
+                <output id="ui-sounds-value" for="ui-sounds">60%</output>
+              </span>
+            </label>
+            <label class="sound-setting-row" for="clock-ticking">
+              <span>Clock tick volume</span>
+              <span class="sound-control">
+                <input id="clock-ticking" type="range" min="0" max="100" step="1" value="0">
+                <output id="clock-ticking-value" for="clock-ticking">Off</output>
+              </span>
+            </label>
+            <p class="setting-description">Set either slider to Off to mute it. The soft tick follows the displayed countdown in every mode.</p>
+          </div>
+        </section>
       </section>
     </div>
+  </dialog>
+  <dialog class="about-dialog" id="about-dialog" aria-labelledby="about-title">
+    <article class="about-card" id="about-card">
+      <header class="about-brand">
+        <h2 id="about-title">jiKAN</h2>
+        <span>時計 · a little time, well spent</span>
+      </header>
+      <section class="about-versions" aria-label="Version information">
+        <div class="about-version"><span>Current version</span><strong id="current-version">Checking…</strong></div>
+        <div class="about-version"><span>Latest on GitHub</span><strong id="latest-version">Checking…</strong></div>
+      </section>
+      <div class="about-update-area">
+        <button class="control-button primary about-update-button" id="update-button" type="button">Checking for updates…</button>
+        <div class="about-progress" id="update-progress" role="progressbar" aria-label="Downloading update" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><span id="update-progress-bar"></span></div>
+        <p class="about-update-status" id="update-status" role="status" aria-live="polite">Checking the latest release.</p>
+      </div>
+    </article>
   </dialog>
   <div class="status-message" id="status-message" role="status" aria-live="polite"></div>
   <script>
@@ -1622,6 +2028,9 @@
       const themeColor = document.querySelector('meta[name="theme-color"]');
       const modeButtons = [...document.querySelectorAll(".mode-tab")];
       const screensaver = document.getElementById("screensaver");
+      const loadingScreen = document.getElementById("loading-screen");
+      const loadingCard = document.getElementById("loading-logo-card");
+      const loadingLabel = document.querySelector(".loading-label");
       const themeEditor = document.getElementById("theme-editor");
       const settingsToggle = document.querySelector(".settings-toggle");
       const settingsTabs = [...document.querySelectorAll("[data-settings-tab]")];
@@ -1632,19 +2041,225 @@
       const editorName = document.getElementById("theme-name-input");
       const editorError = document.getElementById("editor-error");
       const screensaverDelay = document.getElementById("screensaver-delay");
+      const uiSoundsControl = document.getElementById("ui-sounds");
+      const clockTickingControl = document.getElementById("clock-ticking");
+      const uiSoundsValue = document.getElementById("ui-sounds-value");
+      const clockTickingValue = document.getElementById("clock-ticking-value");
       const hourFormatButtons = [...document.querySelectorAll("[data-hour-format]")];
       const formatIndicator = document.querySelector(".format-indicator");
       const clockScaleControl = document.getElementById("clock-scale");
       const meridiem = document.getElementById("meridiem");
       const statusMessage = document.getElementById("status-message");
+      const aboutTrigger = document.getElementById("about-trigger");
+      const aboutDialog = document.getElementById("about-dialog");
+      const aboutCard = document.getElementById("about-card");
+      const currentVersion = document.getElementById("current-version");
+      const latestVersion = document.getElementById("latest-version");
+      const updateButton = document.getElementById("update-button");
+      const updateStatus = document.getElementById("update-status");
+      const updateProgress = document.getElementById("update-progress");
+      const updateProgressBar = document.getElementById("update-progress-bar");
       let statusTimer = 0;
       let settingsCloseTimer = 0;
+      let aboutAnimation = null;
+      let aboutClosing = false;
+      let updateAvailable = false;
+      let canInstallUpdate = false;
+      let updateChecking = false;
+      let updateInstalling = false;
+      let audioContext = null;
+      let tickNoiseBuffer = null;
+      let lastTickKey = null;
+      let lastVolumePreviewAt = 0;
+      let audioWarningShown = false;
+      let startupReady = false;
+      let startupShineComplete = false;
+      let startupRevealStarted = false;
+
+      function maybeFinishStartup() {
+        if (!startupReady || !startupShineComplete || startupRevealStarted) return;
+        startupRevealStarted = true;
+
+        const cardBounds = loadingCard.getBoundingClientRect();
+        const brand = document.querySelector(".brand");
+        const brandBounds = brand.getBoundingClientRect();
+        const topbarBounds = topbar.getBoundingClientRect();
+        const target = brandBounds.width && brandBounds.height
+          ? brandBounds
+          : { left: topbarBounds.left, top: topbarBounds.top, width: 100, height: 42 };
+        const scaleX = target.width / cardBounds.width;
+        const scaleY = target.height / cardBounds.height;
+        const deltaX = target.left - cardBounds.left;
+        const deltaY = target.top - cardBounds.top;
+
+        appShell.classList.add("startup-enter");
+        document.documentElement.classList.remove("is-loading");
+        loadingScreen.classList.add("exiting");
+
+        const animation = loadingCard.animate([
+          { transform: "translate(0, 0) scale(1, 1)", opacity: 1 },
+          { transform: `translate(${deltaX}px, ${deltaY}px) scale(${scaleX}, ${scaleY})`, opacity: 1, offset: 0.86 },
+          { transform: `translate(${deltaX}px, ${deltaY}px) scale(${scaleX}, ${scaleY})`, opacity: 0 }
+        ], {
+          duration: 1050,
+          easing: "cubic-bezier(.65, 0, .35, 1)",
+          fill: "forwards"
+        });
+        animation.finished.then(() => {
+          loadingScreen.remove();
+          appShell.classList.remove("startup-enter");
+        }).catch(() => {
+          loadingScreen.remove();
+          appShell.classList.remove("startup-enter");
+        });
+      }
+
+      loadingCard.addEventListener("animationiteration", event => {
+        if (event.animationName !== "logo-card-shine") return;
+        startupShineComplete = true;
+        maybeFinishStartup();
+      });
 
       function announce(message) {
         statusMessage.textContent = message;
         statusMessage.classList.add("visible");
         window.clearTimeout(statusTimer);
         statusTimer = window.setTimeout(() => statusMessage.classList.remove("visible"), 3200);
+      }
+
+      async function refreshUpdateCard() {
+        if (updateChecking || updateInstalling) return;
+        const updater = window.jikanUpdater;
+        if (!updater) {
+          currentVersion.textContent = "Browser edition";
+          latestVersion.textContent = "Linux AppImage";
+          updateButton.textContent = "Desktop app only";
+          updateButton.disabled = true;
+          updateStatus.textContent = "Automatic updates are available when jiKAN is running as its Linux AppImage.";
+          return;
+        }
+
+        updateChecking = true;
+        updateButton.disabled = true;
+        updateButton.textContent = "Checking…";
+        updateStatus.textContent = "Checking the latest release on GitHub.";
+        latestVersion.textContent = "Checking…";
+        try {
+          const info = await updater.getAppInfo();
+          currentVersion.textContent = `v${info.currentVersion}`;
+          const release = await updater.checkForUpdates();
+          latestVersion.textContent = `v${release.latestVersion}`;
+          updateAvailable = release.updateAvailable;
+          canInstallUpdate = release.canInstallUpdate;
+
+          if (updateAvailable && canInstallUpdate) {
+            updateButton.textContent = `Update to v${release.latestVersion}`;
+            updateButton.disabled = false;
+            updateStatus.textContent = "A verified update is ready to download and install.";
+          } else if (updateAvailable) {
+            updateButton.textContent = "AppImage only";
+            updateButton.disabled = true;
+            updateStatus.textContent = "A newer release is available; automatic installation requires the Linux AppImage.";
+          } else {
+            updateButton.textContent = "Check again";
+            updateButton.disabled = false;
+            updateStatus.textContent = release.currentIsNewer
+              ? "This build is newer than the latest published release."
+              : "You’re up to date.";
+          }
+        } catch (error) {
+          latestVersion.textContent = "Unavailable";
+          updateButton.textContent = "Retry check";
+          updateButton.disabled = false;
+          updateStatus.textContent = `Could not check GitHub: ${error.message || "network request failed"}`;
+        } finally {
+          updateChecking = false;
+        }
+      }
+
+      function openAboutCard() {
+        if (aboutDialog.open) return;
+        aboutClosing = false;
+        aboutAnimation?.cancel();
+        aboutAnimation = null;
+        aboutDialog.showModal();
+        requestAnimationFrame(() => {
+          if (!aboutDialog.open || aboutClosing) return;
+          const source = aboutTrigger.getBoundingClientRect();
+          const target = aboutCard.getBoundingClientRect();
+          aboutAnimation = aboutCard.animate([
+            {
+              transform: `translate(${source.left + source.width / 2 - target.left - target.width / 2}px, ${source.top + source.height / 2 - target.top - target.height / 2}px) scale(${source.width / target.width}, ${source.height / target.height})`,
+              opacity: .7,
+              borderRadius: "10px"
+            },
+            { transform: "translate(0, 0) scale(1, 1)", opacity: 1, borderRadius: "30px" }
+          ], { duration: 520, easing: "cubic-bezier(.22, 1, .36, 1)", fill: "both" });
+          const openingAnimation = aboutAnimation;
+          openingAnimation.finished.then(() => {
+            if (aboutAnimation === openingAnimation && !aboutClosing) {
+              openingAnimation.cancel();
+              aboutAnimation = null;
+            }
+          }).catch(() => {});
+        });
+        refreshUpdateCard();
+      }
+
+      function closeAboutCard() {
+        if (!aboutDialog.open || aboutClosing || updateInstalling) return;
+        aboutClosing = true;
+        const currentTransform = getComputedStyle(aboutCard).transform;
+        aboutAnimation?.cancel();
+        const source = aboutTrigger.getBoundingClientRect();
+        const target = aboutCard.getBoundingClientRect();
+        const translateX = source.left + source.width / 2 - target.left - target.width / 2;
+        const translateY = source.top + source.height / 2 - target.top - target.height / 2;
+        const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 420;
+        aboutDialog.classList.add("closing");
+        aboutAnimation = aboutCard.animate([
+          { transform: currentTransform, opacity: 1, borderRadius: getComputedStyle(aboutCard).borderRadius },
+          {
+            transform: `translate(${translateX}px, ${translateY}px) scale(${source.width / target.width}, ${source.height / target.height})`,
+            opacity: .7,
+            borderRadius: "10px"
+          }
+        ], { duration, easing: "cubic-bezier(.4, 0, .7, .2)", fill: "both" });
+        const closingAnimation = aboutAnimation;
+        closingAnimation.finished.then(() => {
+          if (aboutAnimation === closingAnimation && aboutDialog.open) aboutDialog.close();
+        }).catch(() => {});
+      }
+
+      async function installAvailableUpdate() {
+        if (updateInstalling || !updateAvailable || !canInstallUpdate) return;
+        updateInstalling = true;
+        updateButton.disabled = true;
+        updateButton.textContent = "Installing…";
+        updateStatus.textContent = "Downloading and verifying the official AppImage.";
+        updateProgress.hidden = false;
+        updateProgressBar.style.width = "0%";
+        updateProgress.setAttribute("aria-valuenow", "0");
+        try {
+          const result = await window.jikanUpdater.installUpdate();
+          if (!result.updated) {
+            updateStatus.textContent = "No newer release is available.";
+            updateInstalling = false;
+            await refreshUpdateCard();
+            return;
+          }
+          updateProgressBar.style.width = "100%";
+          updateProgress.setAttribute("aria-valuenow", "100");
+          updateButton.textContent = "Restarting…";
+          updateStatus.textContent = `jiKAN v${result.version} is installed. Restarting now…`;
+        } catch (error) {
+          updateButton.disabled = false;
+          updateButton.textContent = "Try update again";
+          updateProgress.hidden = true;
+          updateStatus.textContent = `Update failed: ${error.message || "unknown error"}`;
+        } finally {
+          updateInstalling = false;
+        }
       }
 
       function validHex(value) {
@@ -1682,6 +2297,8 @@
         const defaults = {
           themeId: "amber-terminal",
           saverDelay: 0,
+          uiSoundVolume: 60,
+          clockTickVolume: 0,
           hourFormat: "24",
           clockScale: 120,
           timerConfig: { hours: 0, minutes: 25, seconds: 0 },
@@ -1703,6 +2320,12 @@
           return {
             themeId: typeof stored.themeId === "string" ? stored.themeId : defaults.themeId,
             saverDelay: [0, 60000, 120000, 300000, 600000, 900000].includes(stored.saverDelay) ? stored.saverDelay : 0,
+            uiSoundVolume: Number.isFinite(stored.uiSoundVolume)
+              ? Math.min(100, Math.max(0, stored.uiSoundVolume))
+              : stored.uiSounds === false ? 0 : defaults.uiSoundVolume,
+            clockTickVolume: Number.isFinite(stored.clockTickVolume)
+              ? Math.min(100, Math.max(0, stored.clockTickVolume))
+              : stored.clockTicking === true ? 35 : defaults.clockTickVolume,
             hourFormat: stored.hourFormat === "12" ? "12" : "24",
             clockScale: Number.isFinite(stored.clockScale) ? Math.min(120, Math.max(70, stored.clockScale)) : defaults.clockScale,
             timerConfig: parseConfig(stored.timerConfig, ["hours", "minutes", "seconds"], { hours: 99, minutes: 59, seconds: 59 }, { hours: 0, minutes: 0, seconds: 0 }),
@@ -1748,6 +2371,8 @@
         themeSwitching: false,
         screensaver: false,
         saverDelay: savedSettings.saverDelay,
+        uiSoundVolume: savedSettings.uiSoundVolume,
+        clockTickVolume: savedSettings.clockTickVolume,
         hourFormat: savedSettings.hourFormat,
         clockScale: savedSettings.clockScale
       };
@@ -1772,6 +2397,8 @@
           localStorage.setItem("hour.settings", JSON.stringify({
             themeId: themes[state.themeIndex]?.id || "amber-terminal",
             saverDelay: state.saverDelay,
+            uiSoundVolume: state.uiSoundVolume,
+            clockTickVolume: state.clockTickVolume,
             hourFormat: state.hourFormat,
             clockScale: state.clockScale,
             timerConfig: state.timerConfig,
@@ -2494,11 +3121,151 @@
         resetIdleTimer();
       }
 
-      function tick() {
+      function ensureAudioContext() {
+        const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextConstructor) {
+          if (!audioWarningShown) console.warn("Web Audio is unavailable; jiKAN sounds are disabled in this browser.");
+          audioWarningShown = true;
+          return null;
+        }
+        try {
+          audioContext ||= new AudioContextConstructor();
+        } catch (error) {
+          if (!audioWarningShown) console.warn("Could not initialize jiKAN audio.", error);
+          audioWarningShown = true;
+          return null;
+        }
+        return audioContext;
+      }
+
+      function wakeAudioContext() {
+        const context = ensureAudioContext();
+        if (context?.state === "suspended") {
+          context.resume().catch(error => console.warn("Could not resume jiKAN audio.", error));
+        }
+      }
+
+      function playAudioCue(kind, target = null) {
+        const volume = kind === "tick" ? state.clockTickVolume : state.uiSoundVolume;
+        if (volume <= 0) return;
+        const context = ensureAudioContext();
+        if (!context) return;
+        if (context.state === "suspended") {
+          context.resume().then(() => playAudioCue(kind, target)).catch(error => {
+            console.warn("Could not resume jiKAN audio.", error);
+          });
+          return;
+        }
+
+        const startedAt = context.currentTime;
+        const isTick = kind === "tick";
+        const volumeGain = Math.pow(volume / 100, 1.35);
+        if (kind === "slide") {
+          const duration = 0.30;
+          const sampleCount = Math.ceil(context.sampleRate * duration);
+          const buffer = context.createBuffer(1, sampleCount, context.sampleRate);
+          const samples = buffer.getChannelData(0);
+          const textureStep = Math.max(1, Math.floor(context.sampleRate * 0.012));
+          let textureStart = 0.48 + Math.random() * 0.24;
+          let textureEnd = 0.48 + Math.random() * 0.24;
+          for (let index = 0; index < sampleCount; index++) {
+            if (index % textureStep === 0) {
+              textureStart = textureEnd;
+              textureEnd = 0.48 + Math.random() * 0.24;
+            }
+            const blend = (index % textureStep) / textureStep;
+            const texture = textureStart + (textureEnd - textureStart) * blend;
+            samples[index] = (Math.random() * 2 - 1) * texture;
+          }
+          const source = context.createBufferSource();
+          source.buffer = buffer;
+          const filter = context.createBiquadFilter();
+          filter.type = "bandpass";
+          filter.frequency.setValueAtTime(360, startedAt);
+          filter.frequency.exponentialRampToValueAtTime(2600, startedAt + duration * 0.88);
+          filter.Q.setValueAtTime(0.32, startedAt);
+          const envelope = context.createGain();
+          envelope.gain.setValueAtTime(0.0001, startedAt);
+          envelope.gain.linearRampToValueAtTime(volumeGain * 0.11, startedAt + 0.055);
+          envelope.gain.setValueAtTime(volumeGain * 0.09, startedAt + duration * 0.55);
+          envelope.gain.exponentialRampToValueAtTime(0.0001, startedAt + duration);
+          source.connect(filter);
+          filter.connect(envelope);
+          envelope.connect(context.destination);
+          source.start(startedAt);
+          source.stop(startedAt + duration);
+          return;
+        }
+        const duration = kind === "wipe" ? 0.68 : isTick ? 0.024 : 0.085;
+        let buffer;
+        if (isTick && tickNoiseBuffer) {
+          buffer = tickNoiseBuffer;
+        } else {
+          const sampleCount = Math.ceil(context.sampleRate * duration);
+          buffer = context.createBuffer(1, sampleCount, context.sampleRate);
+          const samples = buffer.getChannelData(0);
+          for (let index = 0; index < sampleCount; index++) samples[index] = Math.random() * 2 - 1;
+          if (isTick) tickNoiseBuffer = buffer;
+        }
+
+        const noise = context.createBufferSource();
+        noise.buffer = buffer;
+        const filter = context.createBiquadFilter();
+        filter.type = kind === "wipe" || !isTick ? "bandpass" : "highpass";
+        filter.frequency.setValueAtTime(isTick ? 1850 : kind === "wipe" ? 420 : 460, startedAt);
+        if (kind === "wipe") {
+          filter.frequency.exponentialRampToValueAtTime(2200, startedAt + duration * 0.82);
+          filter.Q.setValueAtTime(0.45, startedAt);
+        } else {
+          filter.Q.setValueAtTime(isTick ? 0.7 : 0.55, startedAt);
+        }
+
+        const envelope = context.createGain();
+        const peak = volumeGain * (kind === "wipe" ? 0.12 : isTick ? 0.82 : 0.42);
+        envelope.gain.setValueAtTime(0.0001, startedAt);
+        if (kind === "wipe") {
+          envelope.gain.linearRampToValueAtTime(peak, startedAt + 0.12);
+          envelope.gain.setValueAtTime(peak * 0.72, startedAt + duration * 0.55);
+          envelope.gain.exponentialRampToValueAtTime(0.0001, startedAt + duration);
+        } else {
+          envelope.gain.exponentialRampToValueAtTime(peak, startedAt + (isTick ? 0.001 : 0.005));
+          envelope.gain.exponentialRampToValueAtTime(0.0001, startedAt + (isTick ? 0.018 : 0.075));
+        }
+
+        noise.connect(filter);
+        filter.connect(envelope);
+        envelope.connect(context.destination);
+        noise.start(startedAt);
+        noise.stop(startedAt + duration);
+
+        if (!isTick && kind !== "wipe") {
+          const tone = context.createOscillator();
+          const toneEnvelope = context.createGain();
+          tone.type = "sine";
+          tone.frequency.setValueAtTime(520, startedAt);
+          tone.frequency.exponentialRampToValueAtTime(310, startedAt + 0.065);
+          toneEnvelope.gain.setValueAtTime(0.0001, startedAt);
+          toneEnvelope.gain.exponentialRampToValueAtTime(volumeGain * 0.2, startedAt + 0.006);
+          toneEnvelope.gain.exponentialRampToValueAtTime(0.0001, startedAt + 0.075);
+          tone.connect(toneEnvelope);
+          toneEnvelope.connect(context.destination);
+          tone.start(startedAt);
+          tone.stop(startedAt + 0.085);
+        }
+      }
+
+      function tick(scheduled = false) {
         const now = Date.now();
+        const timerIsRunning = state.mode === "timer" && state.timerDeadline !== null;
+        const pomodoroIsRunning = state.mode === "pomodoro" && state.pomDeadline !== null;
         if (state.mode === "clock") {
           const current = new Date();
           renderDigits(current.getHours() * 3600 + current.getMinutes() * 60 + current.getSeconds(), true);
+          const tickKey = `clock-${Math.floor(now / 1000)}`;
+          if (scheduled && state.clockTickVolume > 0 && tickKey !== lastTickKey) {
+            lastTickKey = tickKey;
+            playAudioCue("tick");
+          }
           return;
         }
         if (state.mode === "timer" && state.timerDeadline !== null) {
@@ -2531,6 +3298,12 @@
           updateCaption();
           if (transitions) controls();
         }
+        const tickKey = state.mode === "timer" ? `timer-${state.timerRemaining}`
+          : `pomodoro-${state.pomRemaining}`;
+        if (scheduled && state.clockTickVolume > 0 && (timerIsRunning || pomodoroIsRunning) && tickKey !== lastTickKey) {
+          lastTickKey = tickKey;
+          playAudioCue("tick");
+        }
         updateDisplay();
       }
 
@@ -2542,11 +3315,16 @@
         let delay = 1000 - now % 1000;
         const deadline = state.mode === "timer" ? state.timerDeadline : state.mode === "pomodoro" ? state.pomDeadline : null;
         if (deadline !== null) {
-          const untilDisplayChange = (deadline - now) % 1000;
-          delay = Math.min(delay, untilDisplayChange > 0 ? untilDisplayChange : 1000);
+          const timeRemaining = deadline - now;
+          if (timeRemaining <= 0) {
+            delay = 25;
+          } else {
+            const untilDisplayChange = timeRemaining % 1000;
+            delay = untilDisplayChange > 0 ? untilDisplayChange : 1000;
+          }
         }
         tickTimer = window.setTimeout(() => {
-          tick();
+          tick(true);
           scheduleTick();
         }, Math.max(25, delay));
       }
@@ -2591,11 +3369,14 @@
 
       function setTheme(index, direction = 1) {
         if (state.themeSwitching) return;
+        playAudioCue("wipe");
         state.themeSwitching = true;
         state.themeIndex = (index + themes.length) % themes.length;
         const theme = themes[state.themeIndex];
         themeSwitcher.setAttribute("aria-busy", "true");
         document.documentElement.dataset.wipeDirection = direction < 0 ? "reverse" : "forward";
+        const supportsViewTransition = typeof document.startViewTransition === "function";
+        if (supportsViewTransition) document.documentElement.classList.add("theme-switching");
         const applyTheme = () => {
           document.documentElement.dataset.theme = theme.id;
           document.documentElement.style.colorScheme = theme.scheme;
@@ -2612,11 +3393,12 @@
           themeWipeEdge.style.viewTransitionName = "none";
           themeWipeEdge.style.opacity = "0";
           delete document.documentElement.dataset.wipeDirection;
+          document.documentElement.classList.remove("theme-switching");
           state.themeSwitching = false;
           persistSettings();
         };
 
-        if (typeof document.startViewTransition === "function") {
+        if (supportsViewTransition) {
           document.startViewTransition(applyTheme).finished.then(finishTransition, finishTransition);
         } else {
           applyTheme();
@@ -2743,11 +3525,68 @@
         if (document.fullscreenElement) document.exitFullscreen().catch(() => announce("The browser could not exit fullscreen."));
       }
 
+      document.addEventListener("click", event => {
+        if (!(event.target instanceof Element)) return;
+        const control = event.target.closest("button, [role='option']");
+        if (!control || control.disabled || control.getAttribute("aria-disabled") === "true") return;
+        if (control.matches(".theme-arrow, .settings-toggle, [data-action='close-editor']")) return;
+        if (control.matches(".mode-tab, [data-settings-tab], [data-hour-format]")) {
+          const selected = control.getAttribute("aria-pressed") === "true" || control.getAttribute("aria-selected") === "true";
+          if (!selected) playAudioCue("slide");
+          return;
+        }
+        playAudioCue("ui", control);
+      }, true);
       modeButtons.forEach((button, index) => button.addEventListener("click", () => {
         modeIndicator.style.transform = `translateX(${index * 100}%)`;
         setMode(button.dataset.mode);
         scheduleTick();
       }));
+      aboutTrigger.addEventListener("click", openAboutCard);
+      updateButton.addEventListener("click", () => {
+        if (updateAvailable && canInstallUpdate) installAvailableUpdate();
+        else refreshUpdateCard();
+      });
+      aboutDialog.addEventListener("click", event => {
+        if (event.target === aboutDialog) closeAboutCard();
+      });
+      aboutDialog.addEventListener("cancel", event => {
+        event.preventDefault();
+        closeAboutCard();
+      });
+      aboutDialog.addEventListener("close", () => {
+        aboutAnimation?.cancel();
+        aboutAnimation = null;
+        aboutClosing = false;
+        aboutDialog.classList.remove("closing");
+        aboutDialog.dataset.tilting = "false";
+      });
+      aboutCard.addEventListener("pointermove", event => {
+        if (event.pointerType === "touch") return;
+        const bounds = aboutCard.getBoundingClientRect();
+        const x = Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width));
+        const y = Math.max(0, Math.min(1, (event.clientY - bounds.top) / bounds.height));
+        aboutDialog.dataset.tilting = "true";
+        aboutCard.style.setProperty("--tilt-x", `${(0.5 - y) * 11}deg`);
+        aboutCard.style.setProperty("--tilt-y", `${(x - 0.5) * 11}deg`);
+        aboutCard.style.setProperty("--lift-x", `${(x - 0.5) * 5}px`);
+        aboutCard.style.setProperty("--lift-y", `${(y - 0.5) * 5}px`);
+        aboutCard.style.setProperty("--shine-x", `${x * 100}%`);
+        aboutCard.style.setProperty("--shine-y", `${y * 100}%`);
+      });
+      aboutCard.addEventListener("pointerleave", () => {
+        aboutDialog.dataset.tilting = "false";
+        for (const property of ["--tilt-x", "--tilt-y", "--lift-x", "--lift-y"]) {
+          aboutCard.style.setProperty(property, "0px");
+        }
+      });
+      window.jikanUpdater?.onProgress(percent => {
+        const progress = Math.max(0, Math.min(100, Number(percent) || 0));
+        updateProgress.hidden = false;
+        updateProgressBar.style.width = `${progress}%`;
+        updateProgress.setAttribute("aria-valuenow", String(progress));
+        updateStatus.textContent = `Downloading verified update · ${progress}%`;
+      });
       themeSwitcher.addEventListener("click", event => {
         const button = event.target.closest("[data-theme-step]");
         if (!button) return;
@@ -2776,6 +3615,7 @@
       document.querySelector(".topbar-actions").addEventListener("click", event => {
         const action = event.target.closest("[data-action]")?.dataset.action;
         if (action === "theme-editor") {
+          playAudioCue("wipe");
           if (themeEditor.open) closeThemeEditor();
           else openThemeEditor();
         }
@@ -2783,7 +3623,10 @@
       settingsTabs.forEach(tab => tab.addEventListener("click", () => selectSettingsTab(tab.dataset.settingsTab)));
       selectSettingsTab("themes");
       themeEditor.addEventListener("click", event => {
-        if (event.target === themeEditor) closeThemeEditor();
+        if (event.target === themeEditor) {
+          playAudioCue("wipe");
+          closeThemeEditor();
+        }
       });
       themeEditor.addEventListener("cancel", event => {
         event.preventDefault();
@@ -2791,7 +3634,10 @@
       });
       themeEditor.addEventListener("click", event => {
         const action = event.target.closest("[data-action]")?.dataset.action;
-        if (action === "close-editor") closeThemeEditor();
+        if (action === "close-editor") {
+          playAudioCue("wipe");
+          closeThemeEditor();
+        }
         if (action === "new-theme") {
           editingThemeId = "";
           managedTheme.value = "";
@@ -2831,6 +3677,34 @@
       });
       clockScaleControl.addEventListener("change", persistSettings);
       screensaverDelay.value = String(state.saverDelay);
+      uiSoundsControl.value = String(state.uiSoundVolume);
+      clockTickingControl.value = String(state.clockTickVolume);
+      uiSoundsValue.value = state.uiSoundVolume ? `${state.uiSoundVolume}%` : "Off";
+      uiSoundsValue.textContent = uiSoundsValue.value;
+      clockTickingValue.value = state.clockTickVolume ? `${state.clockTickVolume}%` : "Off";
+      clockTickingValue.textContent = clockTickingValue.value;
+      uiSoundsControl.addEventListener("input", () => {
+        state.uiSoundVolume = Number(uiSoundsControl.value);
+        uiSoundsValue.value = state.uiSoundVolume ? `${state.uiSoundVolume}%` : "Off";
+        uiSoundsValue.textContent = uiSoundsValue.value;
+        const now = performance.now();
+        if (now - lastVolumePreviewAt >= 100) {
+          lastVolumePreviewAt = now;
+          playAudioCue("ui");
+        }
+      });
+      uiSoundsControl.addEventListener("change", persistSettings);
+      clockTickingControl.addEventListener("input", () => {
+        state.clockTickVolume = Number(clockTickingControl.value);
+        clockTickingValue.value = state.clockTickVolume ? `${state.clockTickVolume}%` : "Off";
+        clockTickingValue.textContent = clockTickingValue.value;
+        const now = performance.now();
+        if (now - lastVolumePreviewAt >= 100) {
+          lastVolumePreviewAt = now;
+          playAudioCue("tick");
+        }
+      });
+      clockTickingControl.addEventListener("change", persistSettings);
       enhanceCustomSelect(managedTheme);
       enhanceCustomSelect(screensaverDelay);
       hourFormatButtons.forEach((button, index) => {
@@ -2870,6 +3744,13 @@
         scheduleTick();
       });
       document.addEventListener("keydown", event => {
+        if (aboutDialog.open) {
+          if (event.key === "Escape") {
+            event.preventDefault();
+            closeAboutCard();
+          }
+          return;
+        }
         if (state.screensaver && event.key === "Escape") {
           event.preventDefault();
           exitScreensaver();
@@ -2886,12 +3767,14 @@
         if (event.code === "Space" && !event.target.matches("input, textarea, select, [contenteditable='true']")) {
           event.preventDefault();
           if (event.repeat || state.mode === "clock" || themeEditor.open) return;
+          playAudioCue("ui", panel.querySelector('[data-action="toggle"]'));
           state.mode === "timer" ? toggleTimer() : togglePomodoro();
           scheduleTick();
           return;
         }
         if (event.key.toLowerCase() === "f" && !event.target.matches("input, textarea, select")) {
           event.preventDefault();
+          playAudioCue("ui", panel.querySelector('[data-action="fullscreen"]'));
           state.fullscreen ? exitFullscreen() : enterFullscreen();
         } else if (event.key === "Escape" && state.fullscreen) {
           exitFullscreen();
@@ -2950,6 +3833,19 @@
       tick();
       scheduleTick();
       resetIdleTimer();
+      const finishAppInitialization = () => requestAnimationFrame(() => requestAnimationFrame(() => {
+        startupReady = true;
+        loadingLabel.classList.add("is-hidden");
+        loadingLabel.setAttribute("aria-hidden", "true");
+        maybeFinishStartup();
+      }));
+      const fontsReady = document.fonts?.ready || Promise.resolve();
+      fontsReady
+        .then(finishAppInitialization)
+        .catch(error => {
+          console.warn("Could not wait for jiKAN's fonts before startup.", error);
+          finishAppInitialization();
+        });
     })();
   </script>
 </body>

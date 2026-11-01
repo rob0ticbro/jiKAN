@@ -12,6 +12,7 @@ A polished, offline flip clock and focus timer for your desktop. Pick Clock, Tim
 - **Fourteen built-in themes** plus an editor for your own color palettes
 - **12/24-hour time**, adjustable clock size, and configurable timer durations
 - **A bouncing screensaver** with an optional inactivity timer
+- **Tactile UI sounds** with an optional clock tick, both adjustable in Settings
 - **Thoughtful controls** with custom dropdowns and sliders, keyboard shortcuts, and reduced-motion support
 - **Works offline** as a local HTML page or Linux desktop app—no accounts, network calls, frameworks, or remote assets
 
@@ -35,11 +36,11 @@ The Electron app wraps the same local HTML, CSS, and JavaScript. Chromium is bun
 
 ### Download the AppImage
 
-Grab `jiKAN-1.1.0-x86_64.AppImage` from [GitHub Releases](https://github.com/rob0ticbro/jiKAN/releases), make it executable if needed, and run it:
+Grab `jiKAN-1.2.0-x86_64.AppImage` from [GitHub Releases](https://github.com/rob0ticbro/jiKAN/releases), make it executable if needed, and run it:
 
 ```sh
-chmod +x jiKAN-1.1.0-x86_64.AppImage
-./jiKAN-1.1.0-x86_64.AppImage
+chmod +x jiKAN-1.2.0-x86_64.AppImage
+./jiKAN-1.2.0-x86_64.AppImage
 ```
 
 AppImage launch may need FUSE 2 compatibility on some distributions. Compatibility also depends on the host's glibc and graphics drivers.
@@ -60,6 +61,8 @@ npm run app:build
 ```
 
 The AppImage is written to `release/`. The desktop app uses Chromium's normal hardware-acceleration selection; actual animation performance depends on your operating system, driver, and display.
+
+Click the **jiKAN** wordmark in the desktop app to view its current version and check GitHub for updates. The in-app updater applies verified x86_64 AppImage releases in place; settings and saved themes remain in your user data. Automatic installation requires a writable AppImage location.
 
 ## Project layout
 

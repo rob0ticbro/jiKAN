@@ -1,9 +1,13 @@
-# jiKAN 1.1.0
+# jiKAN 1.2.0
 
 jiKAN is a polished, offline flip clock and focus timer with a standalone browser version and a lightweight Electron desktop app.
 
 ## What's new
 
+- Added an About card with version checking and verified in-place AppImage updates
+- Added a mouse-responsive, animated About card with a periodic highlight
+- Added tactile synthesized UI sounds with a Settings toggle
+- Added an optional clock tick sound, off by default
 - Updated the app identity and GitHub presentation to **jiKAN** (時計)
 - Made **Amber Terminal** the default theme and moved **Obsidian** to the end of the theme carousel
 - Refined the Settings drawer with animated custom dropdowns, theme-aware sliders, and cleaner color controls
@@ -24,7 +28,7 @@ jiKAN is a polished, offline flip clock and focus timer with a standalone browse
 
 ## Linux AppImage
 
-Download **`jiKAN-1.1.0-x86_64.AppImage`** from the GitHub Release assets, or build it with `npm run app:build`. The AppImage is for 64-bit x86 Linux.
+Download **`jiKAN-1.2.0-x86_64.AppImage`** from the GitHub Release assets, or build it with `npm run app:build`. The AppImage is for 64-bit x86 Linux.
 
 The app uses Chromium's normal hardware-acceleration selection and requests GPU rasterization when available. Performance depends on the host operating system, graphics driver, and display.
 
