@@ -36,11 +36,11 @@ The Electron app wraps the same local HTML, CSS, and JavaScript. Chromium is bun
 
 ### Download the AppImage
 
-Grab `jiKAN-1.2.0-x86_64.AppImage` from [GitHub Releases](https://github.com/rob0ticbro/jiKAN/releases), make it executable if needed, and run it:
+Grab `jiKAN-2.0.0-x86_64.AppImage` from [GitHub Releases](https://github.com/rob0ticbro/jiKAN/releases), make it executable if needed, and run it:
 
 ```sh
-chmod +x jiKAN-1.2.0-x86_64.AppImage
-./jiKAN-1.2.0-x86_64.AppImage
+chmod +x jiKAN-2.0.0-x86_64.AppImage
+./jiKAN-2.0.0-x86_64.AppImage
 ```
 
 AppImage launch may need FUSE 2 compatibility on some distributions. Compatibility also depends on the host's glibc and graphics drivers.
