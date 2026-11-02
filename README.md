@@ -1,6 +1,6 @@
 # jiKAN — 時計
 
-A polished, offline flip clock and focus timer for your desktop. Pick Clock, Timer, or Pomodoro, make it yours, then get out of the way.
+A polished offline flip clock and focus timer for your desktop.
 
 ![jiKAN desktop app](screenshots/jikan-desktop.png)
 
@@ -24,9 +24,7 @@ A polished, offline flip clock and focus timer for your desktop. Pick Clock, Tim
 
 jiKAN is vibe-coded: I brought the idea, opinions, prompts, and testing, and AI helped write a lot of the code. It's my first open-source project, so if you spot a rough edge, bug reports and PRs are very welcome. It's released under GPL-3.0.
 
-## Run it in your browser
-
-Open `index.html` in a modern browser. No server, setup, or internet connection needed. Your theme, clock format, timer settings, and screensaver preferences stay in that browser's local storage.
+<p><a href="https://rob0ticbro.github.io/jiKAN/"><img src="screenshots/open-web-version.svg" alt="Open jiKAN in your browser"></a></p>
 
 ## Use jiKAN
 

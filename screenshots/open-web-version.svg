@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="270" height="52" viewBox="0 0 270 52" role="img" aria-labelledby="title">
+  <title id="title">Open jiKAN in your browser</title>
+  <rect x="1" y="1" width="268" height="50" rx="12" fill="#6d5bd0"/>
+  <path d="M22 18v16m-7-8h14" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="2"/>
+  <text x="43" y="32" fill="#fff" font-family="system-ui, sans-serif" font-size="16" font-weight="600">Open jiKAN in your browser</text>
+</svg>
