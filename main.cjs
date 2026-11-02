@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcMain } = require("electron");
+const { app, BrowserWindow, Menu, Notification, ipcMain } = require("electron");
 const { createHash } = require("node:crypto");
 const { spawn } = require("node:child_process");
 const fs = require("node:fs/promises");
@@ -76,6 +76,24 @@ ipcMain.handle("app:info", () => ({
   currentVersion: app.getVersion(),
   canInstallUpdate: Boolean(appImagePath())
 }));
+
+ipcMain.handle("notifications:timer-finished", (event, title, body) => {
+  if (!Notification.isSupported()) return false;
+  const window = BrowserWindow.fromWebContents(event.sender);
+  if (window && !window.isDestroyed() && window.isFocused()) return false;
+  const notification = new Notification({
+    title: typeof title === "string" ? title.slice(0, 100) : "Timer complete",
+    body: typeof body === "string" ? body.slice(0, 240) : "Your jiKAN timer has finished."
+  });
+  notification.on("click", () => {
+    if (!window || window.isDestroyed()) return;
+    if (window.isMinimized()) window.restore();
+    window.show();
+    window.focus();
+  });
+  notification.show();
+  return true;
+});
 
 ipcMain.handle("updates:check", async () => {
   const latest = await getLatestRelease();
@@ -195,6 +213,7 @@ function createWindow() {
       nodeIntegration: false,
       sandbox: true,
       preload: path.join(__dirname, "preload.cjs"),
+      backgroundThrottling: false,
     },
   });
 

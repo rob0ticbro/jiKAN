@@ -2,6 +2,7 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("jikanUpdater", Object.freeze({
   getAppInfo: () => ipcRenderer.invoke("app:info"),
+  notifyTimerFinished: (title, body) => ipcRenderer.invoke("notifications:timer-finished", title, body),
   checkForUpdates: () => ipcRenderer.invoke("updates:check"),
   installUpdate: () => ipcRenderer.invoke("updates:install"),
   onProgress(callback) {

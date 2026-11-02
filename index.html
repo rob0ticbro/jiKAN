@@ -27,6 +27,12 @@
       --segment-edge: #1d1d1b;
       --segment-active: #20201e;
       --segment-active-edge: #30302d;
+      --shell-side-inset: clamp(20px, 5vw, 72px);
+      --shell-top-inset: 34px;
+      --header-side-shift: 28px;
+      --settings-extra-shift: 10px;
+      --settings-action-top: calc(var(--shell-top-inset) - 8px);
+      --settings-action-right: calc(var(--shell-side-inset) - var(--header-side-shift) - var(--settings-extra-shift));
       --digit-bg: linear-gradient(110deg, #171716, #10100f 54%, #171716);
       --face-bg: linear-gradient(105deg, #1a1a19, #121211 55%, #191918);
       --digit-ink: #efeee9;
@@ -58,7 +64,7 @@
       display: flex;
       min-height: 100vh;
       flex-direction: column;
-      padding: 34px clamp(20px, 5vw, 72px) 28px;
+      padding: var(--shell-top-inset) var(--shell-side-inset) 28px;
     }
 
     html.is-loading .app-shell { opacity: 0; pointer-events: none; }
@@ -133,6 +139,7 @@
     }
 
     .logo-loading-face {
+      position: relative;
       display: flex;
       align-items: baseline;
       gap: 13px;
@@ -194,8 +201,9 @@
     }
 
     .topbar {
+      position: relative;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       min-height: 42px;
     }
@@ -204,7 +212,13 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      margin-left: auto;
+    }
+
+    .theme-footer {
+      display: flex;
+      flex: 0 0 auto;
+      justify-content: center;
+      padding-top: 8px;
     }
 
     .brand {
@@ -216,6 +230,7 @@
       gap: 10px;
       padding: 8px 11px;
       margin: -8px -11px;
+      translate: calc(0px - var(--header-side-shift)) 0;
       border-radius: 10px;
       color: var(--foreground);
       font-size: 21px;
@@ -303,11 +318,11 @@
       background: #000c;
       -webkit-backdrop-filter: blur(16px);
       backdrop-filter: blur(16px);
-      animation: about-backdrop-in 360ms ease both;
+      animation: about-backdrop-in 520ms cubic-bezier(.22, 1, .36, 1) both;
     }
 
     .about-dialog.closing::backdrop {
-      animation: about-backdrop-out 420ms ease both;
+      animation: about-backdrop-out 520ms cubic-bezier(.22, 1, .36, 1) both;
     }
 
     .about-card {
@@ -486,7 +501,15 @@
       transition: none !important;
     }
 
-    .settings-toggle.control-button.icon-button { min-width: 48px; width: 48px; height: 48px; }
+    .settings-toggle.control-button.icon-button {
+      position: absolute;
+      top: -8px;
+      right: 0;
+      translate: calc(var(--header-side-shift) + var(--settings-extra-shift)) 0;
+      min-width: 48px;
+      width: 48px;
+      height: 48px;
+    }
     .settings-toggle.control-button.icon-button svg { width: 26px; height: 26px; overflow: visible; }
     .settings-toggle svg path { fill: none; stroke: currentColor; stroke-width: 1.8; }
     .settings-toggle svg circle { stroke: currentColor; stroke-width: 1.8; }
@@ -661,7 +684,7 @@
       transition: color 280ms ease;
     }
 
-    .mode-tab::before, .settings-tab::before {
+    .mode-tab::before, .settings-tab::before, .focus-range button::before, .format-toggle button::before {
       position: absolute;
       z-index: -1;
       inset: 0;
@@ -680,8 +703,8 @@
 
     .mode-tab:hover { color: var(--foreground); }
 
-    .mode-tab:hover::before, .settings-tab:hover::before { opacity: 1; }
-    .mode-tab[aria-pressed="true"] { color: var(--foreground); }
+    .mode-tab:hover::before, .settings-tab:hover::before, .focus-range button:hover::before, .format-toggle button:hover::before { opacity: 1; }
+    .mode-tab[aria-pressed="true"], .focus-range button[aria-pressed="true"], .format-toggle button[aria-pressed="true"] { color: var(--foreground); }
     .mode-tab:focus-visible {
       outline: 2px solid var(--theme-accent);
       outline-offset: 3px;
@@ -957,6 +980,20 @@
       isolation: isolate;
     }
 
+    .control-button.mode-control-entering {
+      animation: mode-control-enter 300ms ease-out both;
+      transition: none;
+    }
+
+    @keyframes mode-control-enter {
+      from { opacity: 0; transform: scale(.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .control-button.mode-control-entering { animation-duration: .01ms; }
+    }
+
     .control-button::before {
       position: absolute;
       z-index: -1;
@@ -1032,6 +1069,7 @@
 
     .fullscreen-mode, .fullscreen-mode body { width: 100%; height: 100%; min-height: 100%; overflow: hidden; cursor: none; }
     .fullscreen-mode .topbar,
+    .fullscreen-mode .theme-footer,
     .fullscreen-mode .mode-tabs,
     .fullscreen-mode .mode-caption,
     .fullscreen-mode .control-panel { display: none; }
@@ -1039,7 +1077,8 @@
 
 
     @media (max-width: 620px) {
-      .app-shell { padding: 22px 16px; }
+      :root { --shell-top-inset: 22px; --shell-side-inset: 16px; }
+      .app-shell { padding: var(--shell-top-inset) var(--shell-side-inset); }
       .theme-switcher { gap: 7px; }
       .theme-current { min-width: 112px; }
       .theme-arrow { width: 30px; height: 30px; }
@@ -1062,7 +1101,8 @@
     }
 
     @media (max-height: 760px) {
-      .app-shell { padding-top: 20px; padding-bottom: 16px; }
+      :root { --shell-top-inset: 20px; }
+      .app-shell { padding-top: var(--shell-top-inset); padding-bottom: 16px; }
       .workspace { padding: 18px 0; gap: clamp(18px, 3vh, 30px); }
       .theme-editor .editor-content { padding-top: 22px; padding-bottom: 22px; }
       .theme-editor .editor-section { margin-top: 14px; padding-top: 12px; }
@@ -1083,7 +1123,7 @@
       *, *::before, *::after { scroll-behavior: auto !important; }
       .digit.flipping .flap-top { animation-duration: .14s; }
       .digit.flipping .flap-bottom { animation-duration: .14s; animation-delay: .12s; }
-      .mode-indicator, .mode-tab, .settings-indicator, .settings-tab, .format-indicator { transition-duration: .01ms; }
+      .mode-indicator, .mode-tab, .settings-indicator, .settings-tab, .format-indicator, .focus-range-indicator { transition-duration: .01ms; }
       body, .digit, .half, .flap, .theme-name, .theme-editor { transition-duration: .01ms; }
       ::view-transition-new(root),
       ::view-transition-new(wipe-edge) { animation-duration: .01ms !important; }
@@ -1404,11 +1444,21 @@
     .theme-editor::-webkit-scrollbar { display: none; }
     .theme-editor.visible { transform: translateX(0); }
     .theme-editor::backdrop { background: #0009; }
-    .editor-content { padding: clamp(24px, 3.2vw, 34px); }
-    .editor-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
+    .editor-content { position: relative; padding: clamp(24px, 3.2vw, 34px); }
+    .editor-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 24px; padding-right: 52px; }
     .editor-heading h2 { margin: 0; font-size: 21px; font-weight: 600; letter-spacing: -.025em; }
     .editor-heading p { margin: 6px 0 0; color: var(--subtle); font-size: 13px; line-height: 1.5; }
-    .editor-close { min-width: 42px; width: 42px; height: 42px; padding: 0; font-size: 22px; }
+    .editor-close {
+      position: fixed;
+      top: var(--settings-action-top);
+      right: var(--settings-action-right);
+      min-width: 48px;
+      width: 48px;
+      height: 48px;
+      padding: 0;
+      font-size: 22px;
+    }
+    .editor-close svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
     .settings-tabs {
       position: relative;
       display: grid;
@@ -1551,9 +1601,52 @@
     }
     .theme-form input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--theme-accent); }
     .theme-form .glow-field { grid-column: 1 / -1; }
+    .theme-toggle-row, .setting-switch-row {
+      display: flex;
+      min-height: 48px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      color: var(--subtle);
+      font-size: 13px;
+    }
+    .theme-switch {
+      position: relative;
+      width: 42px;
+      height: 24px;
+      flex: 0 0 auto;
+      padding: 3px;
+      border: 1px solid var(--edge);
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--panel) 68%, var(--page));
+      cursor: pointer;
+      transition: background-color .2s ease, border-color .2s ease;
+    }
+    .theme-switch::after {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--subtle);
+      box-shadow: 0 1px 3px #0004;
+      content: "";
+      transition: transform .22s cubic-bezier(.22, 1, .36, 1), background-color .2s ease;
+    }
+    .theme-switch[aria-checked="true"] {
+      border-color: color-mix(in srgb, var(--theme-accent) 70%, var(--edge));
+      background: color-mix(in srgb, var(--theme-accent) 28%, var(--panel));
+    }
+    .theme-switch[aria-checked="true"]::after {
+      background: var(--theme-accent);
+      transform: translateX(18px);
+    }
+    .theme-switch:focus-visible { outline: 2px solid var(--theme-accent); outline-offset: 3px; }
     .editor-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 16px; }
     .editor-actions .danger { color: #ef7777; }
     .editor-actions .spacer { flex: 1; }
+    .theme-import-input { display: none; }
     .saver-settings {
       display: grid;
       gap: 0;
@@ -1664,16 +1757,144 @@
       font-size: 12px;
       line-height: 1.55;
     }
+    .focus-summary {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 0 10px;
+      color: var(--subtle);
+      font-size: 13px;
+    }
+    .focus-summary strong { color: var(--foreground); font-size: 20px; font-variant-numeric: tabular-nums; }
+    .focus-range {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin: 14px 0 8px;
+      border-radius: 9px;
+      background: transparent;
+      isolation: isolate;
+    }
+    .focus-range-indicator {
+      position: absolute;
+      z-index: 0;
+      inset: 0 auto 0 0;
+      width: calc(100% / 3);
+      border-radius: 9px;
+      background: var(--segment-active);
+      box-shadow: inset 0 1px #ffffff12, 0 2px 8px #0001;
+      transition: transform 620ms cubic-bezier(.22, 1, .36, 1), background-color 240ms ease, border-color 240ms ease;
+      pointer-events: none;
+    }
+    .focus-range button {
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+      isolation: isolate;
+      min-height: 34px;
+      padding: 7px 10px;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--subtle);
+      cursor: pointer;
+      font: inherit;
+      font-size: 12px;
+      transition: color 280ms ease;
+    }
+    .focus-range button:focus-visible { outline: 2px solid var(--theme-accent); outline-offset: 2px; }
+    .focus-range-label { margin: 0 0 10px; color: var(--subtle); font-size: 11px; }
+    .focus-analytics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .focus-analytic {
+      display: grid;
+      gap: 6px;
+      padding: 12px;
+      border: 1px solid color-mix(in srgb, var(--edge) 72%, transparent);
+      border-radius: 10px;
+      color: var(--subtle);
+      font-size: 11px;
+    }
+    .focus-analytic strong { color: var(--foreground); font-size: 20px; font-variant-numeric: tabular-nums; }
+    .focus-chart-wrap { margin-top: 16px; }
+    .focus-chart-heading { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 6px; color: var(--subtle); font-size: 11px; }
+    .focus-chart { display: block; width: 100%; height: 94px; overflow: visible; }
+    .focus-chart-bar { fill: var(--theme-accent); opacity: .78; }
+    .focus-chart-bar:hover { opacity: 1; }
+    .focus-chart-baseline { stroke: color-mix(in srgb, var(--edge) 75%, transparent); stroke-width: 1; }
+    .focus-chart-axis {
+      display: grid;
+      height: 18px;
+      align-items: start;
+      color: var(--subtle);
+      font-size: 9px;
+      line-height: 1.2;
+      text-align: center;
+    }
+    .focus-chart-axis span { white-space: nowrap; }
+    .focus-history-heading { margin: 14px 0 2px; color: var(--subtle); font-size: 11px; font-weight: 500; }
+    .focus-history-list { display: grid; gap: 0; max-height: 190px; overflow: auto; }
+    .focus-history-entry {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 9px 0;
+      border-top: 1px solid color-mix(in srgb, var(--edge) 62%, transparent);
+      color: var(--subtle);
+      font-size: 12px;
+    }
+    .focus-history-entry time { color: var(--foreground); font-variant-numeric: tabular-nums; }
+    .focus-history-empty { margin: 0; padding: 4px 0 12px; color: var(--subtle); font-size: 12px; }
+    .history-actions { display: flex; justify-content: flex-end; padding: 4px 0 8px; }
+    .history-actions .control-button { min-height: 32px; padding: 5px 10px; font-size: 11px; }
+    .keyboard-help { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px 16px; }
+    .keyboard-help div { display: flex; justify-content: space-between; gap: 12px; color: var(--subtle); font-size: 12px; }
+    .keyboard-help kbd {
+      min-width: 24px;
+      padding: 2px 6px;
+      border: 1px solid var(--edge);
+      border-radius: 5px;
+      background: var(--input-bg);
+      color: var(--foreground);
+      font: inherit;
+      text-align: center;
+    }
+    .completion-toast {
+      position: fixed;
+      z-index: 1001;
+      right: 24px;
+      bottom: 24px;
+      display: flex;
+      width: min(390px, calc(100vw - 32px));
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px 20px;
+      border: 1px solid color-mix(in srgb, var(--theme-accent) 48%, var(--edge));
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--panel) 96%, var(--page));
+      box-shadow: 0 18px 55px #0009, 0 0 30px color-mix(in srgb, var(--theme-accent) 14%, transparent);
+      color: var(--foreground);
+      animation: completion-toast-in 320ms cubic-bezier(.22, 1, .36, 1) both;
+    }
+    .completion-toast[hidden] { display: none; }
+    .completion-toast strong { display: block; font-size: 14px; }
+    .completion-toast p { margin: 4px 0 0; color: var(--subtle); font-size: 12px; line-height: 1.5; }
+    .completion-toast button { flex: 0 0 auto; }
+    @keyframes completion-toast-in {
+      from { opacity: 0; transform: translateY(12px) scale(.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
     .clock-scale-row { display: flex; align-items: center; justify-content: flex-end; width: min(260px, 55%); }
     .format-toggle {
       position: relative;
       display: grid;
       width: min(220px, 52%);
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      padding: 3px;
-      border: 1px solid var(--edge);
+      padding: 0;
+      border: 0;
       border-radius: 9px;
-      background: color-mix(in srgb, var(--panel) 68%, var(--page));
+      background: transparent;
       isolation: isolate;
     }
     .format-toggle button {
@@ -1683,7 +1904,7 @@
       isolation: isolate;
       min-height: 34px;
       border: 0;
-      border-radius: 7px;
+      border-radius: 9px;
       background: transparent;
       color: var(--subtle);
       cursor: pointer;
@@ -1691,23 +1912,6 @@
       font-size: 12px;
       transition: color .2s ease;
     }
-    .format-toggle button::before {
-      position: absolute;
-      z-index: -1;
-      inset: 0;
-      border-radius: inherit;
-      background: radial-gradient(
-        circle at var(--spot-x, 50%) var(--spot-y, 50%),
-        color-mix(in srgb, var(--foreground) 10%, var(--page)),
-        color-mix(in srgb, var(--foreground) 5%, var(--page)) 42%,
-        transparent 74%
-      );
-      content: "";
-      opacity: 0;
-      transition: opacity .2s ease;
-      pointer-events: none;
-    }
-    .format-toggle button:hover::before { opacity: 1; }
     .format-toggle button[aria-pressed="true"] { color: var(--foreground); }
     .format-toggle button:focus-visible { outline: 2px solid var(--theme-accent); outline-offset: 2px; }
     .format-setting {
@@ -1722,14 +1926,14 @@
     .format-indicator {
       position: absolute;
       z-index: 0;
-      top: 3px;
-      bottom: 3px;
-      left: 3px;
-      width: calc(50% - 3px);
-      border-radius: 7px;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 50%;
+      border-radius: 9px;
       background: var(--segment-active);
       box-shadow: inset 0 1px #ffffff12, 0 2px 8px #0001;
-      transition: transform 300ms cubic-bezier(.22, 1, .36, 1), background-color 240ms ease;
+      transition: transform 620ms cubic-bezier(.22, 1, .36, 1), background-color 240ms ease;
       pointer-events: none;
     }
     .editor-error { min-height: 20px; margin-top: 7px; color: #ef7777; font-size: 13px; }
@@ -1824,6 +2028,9 @@
     html[data-theme="amber-terminal"] .mode-indicator {
       box-shadow: inset 0 1px #ffffff18, 0 2px 12px color-mix(in srgb, var(--theme-accent) 15%, transparent);
     }
+    .focus-range-indicator, .format-indicator {
+      box-shadow: inset 0 1px #ffffff18, 0 2px 12px color-mix(in srgb, var(--theme-accent) 15%, transparent);
+    }
 
   </style>
 </head>
@@ -1842,25 +2049,8 @@
         <span>jiKAN</span><small>時計</small>
       </button>
       <div class="topbar-actions">
-        <div class="theme-switcher" role="group" aria-label="Color theme">
-          <button class="theme-arrow" type="button" data-theme-step="-1" aria-label="Previous theme">
-            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12 4-6 6 6 6"/></svg>
-          </button>
-          <div class="theme-current" aria-live="polite">
-            <span class="theme-name" id="theme-name">Obsidian</span>
-            <span class="theme-count" id="theme-count">01 / 14</span>
-          </div>
-          <button class="theme-arrow" type="button" data-theme-step="1" aria-label="Next theme">
-            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8 4 6 6-6 6"/></svg>
-          </button>
-        </div>
         <button class="control-button icon-button settings-toggle" type="button" data-action="theme-editor" aria-label="Open settings" aria-expanded="false" title="Settings">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4 6h16M4 12h16M4 18h16"/>
-            <circle cx="9" cy="6" r="2" fill="var(--page)"/>
-            <circle cx="15" cy="12" r="2" fill="var(--page)"/>
-            <circle cx="8" cy="18" r="2" fill="var(--page)"/>
-          </svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>
         </button>
       </div>
     </header>
@@ -1868,9 +2058,9 @@
     <section class="workspace" aria-label="Flip clock">
       <nav class="mode-tabs" aria-label="Clock mode">
         <span class="mode-indicator" aria-hidden="true"></span>
-        <button class="mode-tab" type="button" data-mode="clock" aria-pressed="true">Clock</button>
-        <button class="mode-tab" type="button" data-mode="timer" aria-pressed="false">Timer</button>
-        <button class="mode-tab" type="button" data-mode="pomodoro" aria-pressed="false">Pomodoro</button>
+        <button class="mode-tab" type="button" data-mode="clock" aria-pressed="true" aria-keyshortcuts="1">Clock</button>
+        <button class="mode-tab" type="button" data-mode="timer" aria-pressed="false" aria-keyshortcuts="2">Timer</button>
+        <button class="mode-tab" type="button" data-mode="pomodoro" aria-pressed="false" aria-keyshortcuts="3">Pomodoro</button>
       </nav>
 
       <div class="clock-stage">
@@ -1882,6 +2072,20 @@
 
       <div class="control-panel" id="control-panel"></div>
     </section>
+    <footer class="theme-footer">
+      <div class="theme-switcher" role="group" aria-label="Color theme">
+        <button class="theme-arrow" type="button" data-theme-step="-1" aria-label="Previous theme">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12 4-6 6 6 6"/></svg>
+        </button>
+        <div class="theme-current" aria-live="polite">
+          <span class="theme-name" id="theme-name">Obsidian</span>
+          <span class="theme-count" id="theme-count">01 / 14</span>
+        </div>
+        <button class="theme-arrow" type="button" data-theme-step="1" aria-label="Next theme">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8 4 6 6-6 6"/></svg>
+        </button>
+      </div>
+    </footer>
 
   </main>
   <div class="theme-wipe-edge" aria-hidden="true"></div>
@@ -1893,12 +2097,14 @@
           <h2 id="editor-title">jiKAN settings</h2>
           <p>Make the clock yours. Your preferences stay on this device.</p>
         </div>
-        <button class="control-button editor-close" type="button" data-action="close-editor" aria-label="Close theme editor">×</button>
+        <button class="control-button editor-close" type="button" data-action="close-editor" aria-label="Close settings">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+        </button>
       </div>
       <div class="settings-tabs" role="tablist" aria-label="Settings sections">
         <span class="settings-indicator" aria-hidden="true"></span>
-        <button class="settings-tab" id="themes-tab" type="button" role="tab" aria-selected="true" aria-controls="themes-panel" data-settings-tab="themes">Themes</button>
-        <button class="settings-tab" id="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="settings-panel" data-settings-tab="settings">Settings</button>
+        <button class="settings-tab" id="settings-tab" type="button" role="tab" aria-selected="true" aria-controls="settings-panel" data-settings-tab="settings">Settings</button>
+        <button class="settings-tab" id="themes-tab" type="button" role="tab" aria-selected="false" aria-controls="themes-panel" data-settings-tab="themes">Themes</button>
       </div>
       <section class="settings-panel editor-section" id="themes-panel" role="tabpanel" aria-labelledby="themes-tab" data-settings-panel="themes">
         <h3>Custom themes</h3>
@@ -1924,50 +2130,71 @@
           <label class="glow-field" for="theme-glow">Accent glow
             <input id="theme-glow" type="range" min="0" max="40" step="0.1" value="0">
           </label>
-          <label class="glow-field" for="theme-ambient">Ambient background glow
-            <input id="theme-ambient" type="checkbox">
-          </label>
+          <div class="theme-toggle-row glow-field">
+            <span id="theme-ambient-label">Ambient background glow</span>
+            <button id="theme-ambient" class="theme-switch" type="button" role="switch" aria-checked="false" aria-labelledby="theme-ambient-label" title="Toggle ambient background glow"></button>
+          </div>
         </div>
         <div class="editor-actions">
           <button class="control-button" type="button" data-action="new-theme">New</button>
           <button class="control-button" type="button" data-action="duplicate-theme">Duplicate</button>
           <button class="control-button danger" type="button" data-action="delete-theme">Delete</button>
+          <button class="control-button" type="button" data-action="export-themes">Export themes</button>
+          <button class="control-button" type="button" data-action="import-themes">Import themes</button>
+          <input class="theme-import-input" id="theme-import-file" type="file" accept=".json,application/json" tabindex="-1" aria-hidden="true">
           <span class="spacer"></span>
           <button class="control-button primary" type="button" data-action="save-theme">Save &amp; use</button>
         </div>
         <div class="editor-error" id="editor-error" role="status" aria-live="polite"></div>
       </section>
       <section class="settings-panel editor-section" id="settings-panel" role="tabpanel" aria-labelledby="settings-tab" data-settings-panel="settings" hidden>
-        <h3>Display</h3>
-        <div class="saver-settings">
-          <label for="clock-scale">Clock size
-            <span class="clock-scale-row">
-              <input id="clock-scale" type="range" min="70" max="120" step="0.1" value="120">
-            </span>
-          </label>
-          <div class="format-setting">
-            <span class="format-label">Clock format</span>
-            <div class="format-toggle" role="group" aria-label="Clock format">
-              <span class="format-indicator" aria-hidden="true"></span>
-              <button type="button" data-hour-format="24" aria-pressed="true">24-hour</button>
-              <button type="button" data-hour-format="12" aria-pressed="false">12-hour</button>
+        <section class="editor-section" aria-label="Focus history and analytics">
+          <h3>Focus history</h3>
+          <div class="saver-settings">
+            <div class="setting-switch-row">
+              <span id="history-toggle-label">Track completed focus sessions</span>
+              <button id="history-toggle" class="theme-switch" type="button" role="switch" aria-checked="true" aria-expanded="true" aria-controls="focus-history-details" aria-labelledby="history-toggle-label"></button>
+            </div>
+            <p class="setting-description">History stays on this device. Turn tracking off anytime; existing entries remain until you clear them.</p>
+            <div class="focus-history-details" id="focus-history-details">
+              <div class="focus-range" role="group" aria-label="Focus history time range">
+                <span class="focus-range-indicator" aria-hidden="true"></span>
+                <button type="button" data-history-range="day" aria-pressed="true">Day</button>
+                <button type="button" data-history-range="week" aria-pressed="false">Week</button>
+                <button type="button" data-history-range="month" aria-pressed="false">Month</button>
+              </div>
+              <p class="focus-range-label" id="focus-range-label">Today</p>
+              <div class="focus-analytics" aria-live="polite">
+                <div class="focus-analytic"><span>Sessions completed</span><strong id="focus-session-count">0</strong></div>
+                <div class="focus-analytic"><span>Focus time</span><strong id="focus-time-total">0 min</strong></div>
+              </div>
+              <div class="focus-chart-wrap">
+                <div class="focus-chart-heading"><span>Focus time</span><span id="focus-chart-unit">By hour</span></div>
+                <svg class="focus-chart" id="focus-chart" viewBox="0 0 360 94" preserveAspectRatio="none" role="img" aria-label="Focus time by hour today"></svg>
+                <div class="focus-chart-axis" id="focus-chart-axis" aria-hidden="true"></div>
+              </div>
+              <h4 class="focus-history-heading" id="focus-history-heading">Today’s sessions</h4>
+              <div class="focus-history-list" id="focus-history-list" aria-live="polite"></div>
+              <div class="history-actions"><button class="control-button" id="clear-focus-history" type="button">Clear history</button></div>
             </div>
           </div>
-        </div>
-        <section class="editor-section" aria-label="Screensaver settings">
-          <h3>Screensaver</h3>
+        </section>
+        <section class="editor-section" aria-label="Display settings">
+          <h3>Display</h3>
           <div class="saver-settings">
-            <label for="screensaver-delay">Start after inactivity
-              <select id="screensaver-delay">
-                <option value="0">Off</option>
-                <option value="60000">1 minute</option>
-                <option value="120000">2 minutes</option>
-                <option value="300000">5 minutes</option>
-                <option value="600000">10 minutes</option>
-                <option value="900000">15 minutes</option>
-              </select>
+            <label for="clock-scale">Clock size
+              <span class="clock-scale-row">
+                <input id="clock-scale" type="range" min="70" max="120" step="0.1" value="120">
+              </span>
             </label>
-            <p class="setting-description">The screensaver shows the current clock or timer. Press Escape or move the pointer to exit.</p>
+            <div class="format-setting">
+              <span class="format-label">Clock format</span>
+              <div class="format-toggle" role="group" aria-label="Clock format">
+                <span class="format-indicator" aria-hidden="true"></span>
+                <button type="button" data-hour-format="24" aria-pressed="true">24-hour</button>
+                <button type="button" data-hour-format="12" aria-pressed="false">12-hour</button>
+              </div>
+            </div>
           </div>
         </section>
         <section class="editor-section" aria-label="Sound settings">
@@ -1990,6 +2217,35 @@
             <p class="setting-description">Set either slider to Off to mute it. The soft tick follows the displayed countdown in every mode.</p>
           </div>
         </section>
+        <section class="editor-section" aria-label="Keyboard shortcuts">
+          <h3>Keyboard shortcuts</h3>
+          <div class="keyboard-help">
+            <div><span>Clock / Timer / Pomodoro</span><span><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></span></div>
+            <div><span>Start / pause timer</span><kbd>Space</kbd></div>
+            <div><span>Reset countdown</span><kbd>R</kbd></div>
+            <div><span>Fullscreen</span><kbd>F</kbd></div>
+            <div><span>Previous / next theme</span><span><kbd>[</kbd> <kbd>]</kbd></span></div>
+            <div><span>Open / close settings</span><kbd>S</kbd></div>
+            <div><span>Show shortcuts</span><kbd>?</kbd></div>
+            <div><span>Close / exit fullscreen</span><kbd>Esc</kbd></div>
+          </div>
+        </section>
+        <section class="editor-section" aria-label="Screensaver settings">
+          <h3>Screensaver</h3>
+          <div class="saver-settings">
+            <label for="screensaver-delay">Start after inactivity
+              <select id="screensaver-delay">
+                <option value="0">Off</option>
+                <option value="60000">1 minute</option>
+                <option value="120000">2 minutes</option>
+                <option value="300000">5 minutes</option>
+                <option value="600000">10 minutes</option>
+                <option value="900000">15 minutes</option>
+              </select>
+            </label>
+            <p class="setting-description">The screensaver shows the current clock or timer. Press Escape or move the pointer to exit.</p>
+          </div>
+        </section>
       </section>
     </div>
   </dialog>
@@ -2010,6 +2266,10 @@
       </div>
     </article>
   </dialog>
+  <div class="completion-toast" id="completion-toast" role="alert" aria-live="assertive" hidden>
+    <div><strong id="completion-title">Timer complete</strong><p id="completion-message">Your focus session is finished.</p></div>
+    <button class="control-button" id="dismiss-completion" type="button">Dismiss</button>
+  </div>
   <div class="status-message" id="status-message" role="status" aria-live="polite"></div>
   <script>
     (() => {
@@ -2059,8 +2319,25 @@
       const updateStatus = document.getElementById("update-status");
       const updateProgress = document.getElementById("update-progress");
       const updateProgressBar = document.getElementById("update-progress-bar");
+      const completionToast = document.getElementById("completion-toast");
+      const completionTitle = document.getElementById("completion-title");
+      const completionMessage = document.getElementById("completion-message");
+      const historyToggle = document.getElementById("history-toggle");
+      const historyRangeButtons = [...document.querySelectorAll("[data-history-range]")];
+      const focusRangeIndicator = document.querySelector(".focus-range-indicator");
+      const focusRangeLabel = document.getElementById("focus-range-label");
+      const focusSessionCount = document.getElementById("focus-session-count");
+      const focusTimeTotal = document.getElementById("focus-time-total");
+      const focusChart = document.getElementById("focus-chart");
+      const focusChartAxis = document.getElementById("focus-chart-axis");
+      const focusChartUnit = document.getElementById("focus-chart-unit");
+      const focusHistoryHeading = document.getElementById("focus-history-heading");
+      const focusHistoryList = document.getElementById("focus-history-list");
+      const themeImportFile = document.getElementById("theme-import-file");
       let statusTimer = 0;
+      let completionToastTimer = 0;
       let settingsCloseTimer = 0;
+      let settingsOpenFrame = 0;
       let aboutAnimation = null;
       let aboutClosing = false;
       let updateAvailable = false;
@@ -2127,6 +2404,47 @@
         statusTimer = window.setTimeout(() => statusMessage.classList.remove("visible"), 3200);
       }
 
+      function showCompletionToast(title, message) {
+        completionTitle.textContent = title;
+        completionMessage.textContent = message;
+        completionToast.hidden = false;
+        window.clearTimeout(completionToastTimer);
+        completionToastTimer = window.setTimeout(() => {
+          completionToast.hidden = true;
+        }, 12000);
+      }
+
+      async function notifyTimerFinished(title, message) {
+        playCompletionDing();
+        if (document.hasFocus() && document.visibilityState === "visible" && !state.fullscreen) {
+          showCompletionToast(title, message);
+          return;
+        }
+        try {
+          if (window.jikanUpdater?.notifyTimerFinished) {
+            const shown = await window.jikanUpdater.notifyTimerFinished(title, message);
+            if (!shown && !state.fullscreen) {
+              if (document.visibilityState === "visible") showCompletionToast(title, message);
+              else announce(`${title}: ${message}`);
+            }
+          } else if ("Notification" in window && Notification.permission === "granted") {
+            const notification = new Notification(title, { body: message });
+            notification.addEventListener("click", () => window.focus(), { once: true });
+          } else if (!state.fullscreen) {
+            announce(`${title}: ${message}`);
+          }
+        } catch (error) {
+          console.warn("Could not display the jiKAN completion notification.", error);
+          if (!state.fullscreen) announce(`${title}: ${message}`);
+        }
+      }
+
+      function requestBrowserNotificationPermission() {
+        if (!window.jikanUpdater && "Notification" in window && Notification.permission === "default") {
+          Notification.requestPermission().catch(error => console.warn("Could not request notification permission.", error));
+        }
+      }
+
       async function refreshUpdateCard() {
         if (updateChecking || updateInstalling) return;
         const updater = window.jikanUpdater;
@@ -2190,7 +2508,7 @@
           aboutAnimation = aboutCard.animate([
             {
               transform: `translate(${source.left + source.width / 2 - target.left - target.width / 2}px, ${source.top + source.height / 2 - target.top - target.height / 2}px) scale(${source.width / target.width}, ${source.height / target.height})`,
-              opacity: .7,
+              opacity: 0,
               borderRadius: "10px"
             },
             { transform: "translate(0, 0) scale(1, 1)", opacity: 1, borderRadius: "30px" }
@@ -2208,6 +2526,7 @@
 
       function closeAboutCard() {
         if (!aboutDialog.open || aboutClosing || updateInstalling) return;
+        playAudioCue("ui", aboutTrigger);
         aboutClosing = true;
         const currentTransform = getComputedStyle(aboutCard).transform;
         aboutAnimation?.cancel();
@@ -2215,16 +2534,16 @@
         const target = aboutCard.getBoundingClientRect();
         const translateX = source.left + source.width / 2 - target.left - target.width / 2;
         const translateY = source.top + source.height / 2 - target.top - target.height / 2;
-        const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 420;
+        const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 520;
         aboutDialog.classList.add("closing");
         aboutAnimation = aboutCard.animate([
           { transform: currentTransform, opacity: 1, borderRadius: getComputedStyle(aboutCard).borderRadius },
           {
             transform: `translate(${translateX}px, ${translateY}px) scale(${source.width / target.width}, ${source.height / target.height})`,
-            opacity: .7,
+            opacity: 0,
             borderRadius: "10px"
           }
-        ], { duration, easing: "cubic-bezier(.4, 0, .7, .2)", fill: "both" });
+        ], { duration, easing: "cubic-bezier(.22, 1, .36, 1)", fill: "both" });
         const closingAnimation = aboutAnimation;
         closingAnimation.finished.then(() => {
           if (aboutAnimation === closingAnimation && aboutDialog.open) aboutDialog.close();
@@ -2296,11 +2615,13 @@
       function loadSettings() {
         const defaults = {
           themeId: "amber-terminal",
+          mode: "clock",
           saverDelay: 0,
           uiSoundVolume: 60,
           clockTickVolume: 0,
           hourFormat: "24",
           clockScale: 120,
+          trackFocusHistory: true,
           timerConfig: { hours: 0, minutes: 25, seconds: 0 },
           pomConfig: { work: 25, short: 5, long: 15 }
         };
@@ -2319,6 +2640,7 @@
           };
           return {
             themeId: typeof stored.themeId === "string" ? stored.themeId : defaults.themeId,
+            mode: ["clock", "timer", "pomodoro"].includes(stored.mode) ? stored.mode : defaults.mode,
             saverDelay: [0, 60000, 120000, 300000, 600000, 900000].includes(stored.saverDelay) ? stored.saverDelay : 0,
             uiSoundVolume: Number.isFinite(stored.uiSoundVolume)
               ? Math.min(100, Math.max(0, stored.uiSoundVolume))
@@ -2328,6 +2650,7 @@
               : stored.clockTicking === true ? 35 : defaults.clockTickVolume,
             hourFormat: stored.hourFormat === "12" ? "12" : "24",
             clockScale: Number.isFinite(stored.clockScale) ? Math.min(120, Math.max(70, stored.clockScale)) : defaults.clockScale,
+            trackFocusHistory: stored.trackFocusHistory !== false,
             timerConfig: parseConfig(stored.timerConfig, ["hours", "minutes", "seconds"], { hours: 99, minutes: 59, seconds: 59 }, { hours: 0, minutes: 0, seconds: 0 }),
             pomConfig: parseConfig(stored.pomConfig, ["work", "short", "long"], { work: 180, short: 60, long: 90 }, { work: 1, short: 1, long: 1 })
           };
@@ -2357,7 +2680,7 @@
       ];
       themes.push(...storedThemes.map(toCarouselTheme));
       const state = {
-        mode: "clock",
+        mode: savedSettings.mode,
         timerConfig: savedSettings.timerConfig,
         pomConfig: savedSettings.pomConfig,
         timerRemaining: savedSettings.timerConfig.hours * 3600 + savedSettings.timerConfig.minutes * 60 + savedSettings.timerConfig.seconds,
@@ -2371,11 +2694,17 @@
         themeSwitching: false,
         screensaver: false,
         saverDelay: savedSettings.saverDelay,
+        trackFocusHistory: savedSettings.trackFocusHistory,
         uiSoundVolume: savedSettings.uiSoundVolume,
         clockTickVolume: savedSettings.clockTickVolume,
         hourFormat: savedSettings.hourFormat,
         clockScale: savedSettings.clockScale
       };
+      let focusHistory = loadFocusHistory();
+      let focusHistoryRange = "day";
+      let timerInitialDuration = 0;
+      let timerStartedAt = 0;
+      let pomPhaseStartedAt = 0;
 
       const safeInt = (input, fallback = 0) => {
         const value = Number.parseInt(input.value, 10);
@@ -2396,7 +2725,9 @@
         try {
           localStorage.setItem("hour.settings", JSON.stringify({
             themeId: themes[state.themeIndex]?.id || "amber-terminal",
+            mode: state.mode,
             saverDelay: state.saverDelay,
+            trackFocusHistory: state.trackFocusHistory,
             uiSoundVolume: state.uiSoundVolume,
             clockTickVolume: state.clockTickVolume,
             hourFormat: state.hourFormat,
@@ -2422,6 +2753,270 @@
           announce("Browser storage is unavailable; your custom theme could not be saved.");
           return false;
         }
+      }
+
+      function loadFocusHistory() {
+        try {
+          const parsed = JSON.parse(localStorage.getItem("jikan.focus-history") || "[]");
+          if (!Array.isArray(parsed)) throw new TypeError("Focus history must be a list.");
+          return parsed.filter(entry =>
+            entry && typeof entry === "object" &&
+            ["Timer", "Pomodoro"].includes(entry.kind) &&
+            Number.isInteger(entry.seconds) && entry.seconds > 0 && entry.seconds <= 360000 &&
+            Number.isFinite(Date.parse(entry.startedAt)) &&
+            Number.isFinite(Date.parse(entry.completedAt))
+          ).slice(-500);
+        } catch (error) {
+          console.warn("Could not read saved jiKAN focus history.", error);
+          announce("Saved focus history could not be read; starting with an empty history.");
+          return [];
+        }
+      }
+
+      function persistFocusHistory() {
+        try {
+          localStorage.setItem("jikan.focus-history", JSON.stringify(focusHistory.slice(-500)));
+          return true;
+        } catch {
+          announce("Local storage is unavailable; your focus history could not be saved.");
+          return false;
+        }
+      }
+
+      function formatFocusDuration(seconds) {
+        const minutes = Math.round(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const remainingMinutes = minutes % 60;
+        if (hours && remainingMinutes) return `${hours} hr ${remainingMinutes} min`;
+        if (hours) return `${hours} hr`;
+        return `${minutes} min`;
+      }
+
+      function updateFocusHistoryView() {
+        historyToggle.setAttribute("aria-checked", String(state.trackFocusHistory));
+        historyToggle.setAttribute("aria-expanded", String(state.trackFocusHistory));
+        document.getElementById("focus-history-details").hidden = !state.trackFocusHistory;
+        historyRangeButtons.forEach((button, index) => {
+          button.setAttribute("aria-pressed", String(button.dataset.historyRange === focusHistoryRange));
+          if (button.dataset.historyRange === focusHistoryRange) {
+            focusRangeIndicator.style.transform = `translateX(${index * 100}%)`;
+          }
+        });
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        let rangeStart;
+        let buckets;
+        let rangeTitle;
+        let chartUnit;
+        if (focusHistoryRange === "week") {
+          rangeStart = new Date(today);
+          rangeStart.setDate(rangeStart.getDate() - 6);
+          buckets = Array.from({ length: 7 }, (_, index) => {
+            const date = new Date(rangeStart);
+            date.setDate(date.getDate() + index);
+            return {
+              key: `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`,
+              label: date.toLocaleDateString(undefined, { weekday: "short" }),
+              seconds: 0,
+              count: 0
+            };
+          });
+          rangeTitle = "Past 7 days";
+          chartUnit = "By day";
+        } else if (focusHistoryRange === "month") {
+          rangeStart = new Date(today.getFullYear(), today.getMonth() - 11, 1);
+          buckets = Array.from({ length: 12 }, (_, index) => {
+            const date = new Date(rangeStart.getFullYear(), rangeStart.getMonth() + index, 1);
+            return {
+              key: `${date.getFullYear()}-${date.getMonth()}`,
+              label: date.toLocaleDateString(undefined, { month: "short" }),
+              seconds: 0,
+              count: 0
+            };
+          });
+          rangeTitle = "Past 12 months";
+          chartUnit = "By month";
+        } else {
+          rangeStart = today;
+          buckets = Array.from({ length: 24 }, (_, hour) => ({
+            key: String(hour),
+            label: hour % 4 === 0 ? `${hour % 12 || 12}${hour < 12 ? "a" : "p"}` : "",
+            seconds: 0,
+            count: 0
+          }));
+          rangeTitle = "Today";
+          chartUnit = "By hour";
+        }
+        const dateLabel = date => date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+        focusRangeLabel.textContent = focusHistoryRange === "day"
+          ? `${rangeTitle} · ${today.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" })}`
+          : focusHistoryRange === "week"
+            ? `${rangeTitle} · ${dateLabel(rangeStart)} – ${dateLabel(today)}`
+            : `${rangeTitle} · ${rangeStart.toLocaleDateString(undefined, { month: "short", year: "numeric" })} – ${today.toLocaleDateString(undefined, { month: "short", year: "numeric" })}`;
+        focusChartUnit.textContent = chartUnit;
+        focusChartAxis.style.gridTemplateColumns = `repeat(${buckets.length}, minmax(0, 1fr))`;
+        focusChartAxis.replaceChildren();
+        buckets.forEach(bucket => {
+          const label = document.createElement("span");
+          label.textContent = bucket.label;
+          focusChartAxis.append(label);
+        });
+        focusHistoryHeading.textContent = focusHistoryRange === "day"
+          ? "Today’s sessions"
+          : focusHistoryRange === "week" ? "Sessions in the past 7 days" : "Sessions in the past 12 months";
+        const startTime = rangeStart.getTime();
+        const endTime = now.getTime();
+        const filteredHistory = focusHistory.filter(entry => {
+          const completedAt = new Date(entry.completedAt).getTime();
+          return completedAt >= startTime && completedAt <= endTime;
+        });
+        for (const entry of filteredHistory) {
+          const completedAt = new Date(entry.completedAt);
+          const bucketKey = focusHistoryRange === "day"
+            ? String(completedAt.getHours())
+            : focusHistoryRange === "week"
+              ? `${completedAt.getFullYear()}-${completedAt.getMonth()}-${completedAt.getDate()}`
+              : `${completedAt.getFullYear()}-${completedAt.getMonth()}`;
+          const bucket = buckets.find(item => item.key === bucketKey);
+          if (bucket) {
+            bucket.seconds += entry.seconds;
+            bucket.count++;
+          }
+        }
+        focusSessionCount.textContent = String(filteredHistory.length);
+        focusTimeTotal.textContent = formatFocusDuration(filteredHistory.reduce((total, entry) => total + entry.seconds, 0));
+        focusChart.setAttribute("aria-label", `Focus time ${chartUnit.toLowerCase()} for ${rangeTitle.toLowerCase()}`);
+        focusChart.replaceChildren();
+        const svgNamespace = "http://www.w3.org/2000/svg";
+        const baseline = document.createElementNS(svgNamespace, "line");
+        baseline.setAttribute("class", "focus-chart-baseline");
+        baseline.setAttribute("x1", "4");
+        baseline.setAttribute("x2", "356");
+        baseline.setAttribute("y1", "88");
+        baseline.setAttribute("y2", "88");
+        focusChart.append(baseline);
+        const maxSeconds = Math.max(0, ...buckets.map(bucket => bucket.seconds));
+        const slotWidth = 352 / buckets.length;
+        const barWidth = Math.min(16, slotWidth * .64);
+        buckets.forEach((bucket, index) => {
+          const bar = document.createElementNS(svgNamespace, "rect");
+          const height = maxSeconds ? Math.max(2, bucket.seconds / maxSeconds * 72) : 0;
+          const x = 4 + index * slotWidth + (slotWidth - barWidth) / 2;
+          bar.setAttribute("class", "focus-chart-bar");
+          bar.setAttribute("x", String(x));
+          bar.setAttribute("y", String(88 - height));
+          bar.setAttribute("width", String(barWidth));
+          bar.setAttribute("height", String(height));
+          bar.setAttribute("rx", String(Math.min(3, barWidth / 2)));
+          const title = document.createElementNS(svgNamespace, "title");
+          title.textContent =
+            `${bucket.label || (focusHistoryRange === "day" ? `${index}:00` : `Period ${index + 1}`)}: ${bucket.count} ${bucket.count === 1 ? "session" : "sessions"}, ${formatFocusDuration(bucket.seconds)}`;
+          bar.append(title);
+          focusChart.append(bar);
+        });
+        focusHistoryList.replaceChildren();
+        if (!filteredHistory.length) {
+          const empty = document.createElement("p");
+          empty.className = "focus-history-empty";
+          empty.textContent = !state.trackFocusHistory && !focusHistory.length
+            ? "History tracking is off."
+            : focusHistory.length ? "No completed sessions in this time range." : "Completed sessions will appear here.";
+          focusHistoryList.append(empty);
+          return;
+        }
+        for (const entry of filteredHistory.sort((a, b) => Date.parse(b.completedAt) - Date.parse(a.completedAt))) {
+          const row = document.createElement("div");
+          row.className = "focus-history-entry";
+          const label = document.createElement("span");
+          label.textContent = `${entry.kind} · ${formatFocusDuration(entry.seconds)}`;
+          const time = document.createElement("time");
+          time.dateTime = entry.completedAt;
+          time.textContent = new Date(entry.completedAt).toLocaleString(undefined, {
+            month: "short", day: "numeric", hour: "numeric", minute: "2-digit"
+          });
+          row.append(label, time);
+          focusHistoryList.append(row);
+        }
+      }
+
+      function recordFocusSessions(sessions) {
+        if (!state.trackFocusHistory || !sessions.length) return;
+        focusHistory.push(...sessions.map(session => ({
+          kind: session.kind,
+          seconds: session.seconds,
+          startedAt: new Date(session.startedAt).toISOString(),
+          completedAt: new Date(session.completedAt).toISOString()
+        })));
+        focusHistory = focusHistory.slice(-500);
+        persistFocusHistory();
+        updateFocusHistoryView();
+      }
+
+      function exportCustomThemes() {
+        const customThemes = themes.filter(theme => theme.custom).map(theme => {
+          const exported = { id: theme.id, name: theme.name, glow: theme.glow, ambient: theme.ambient };
+          for (const key of colorProperties) exported[key] = theme[key];
+          return exported;
+        });
+        if (!customThemes.length) {
+          editorError.textContent = "Create or import a custom theme before exporting.";
+          return;
+        }
+        const file = new Blob([JSON.stringify({ format: "jikan-themes", version: 1, themes: customThemes }, null, 2)], {
+          type: "application/json"
+        });
+        const url = URL.createObjectURL(file);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "jikan-themes.json";
+        link.click();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+        editorError.textContent = `Exported ${customThemes.length} custom theme${customThemes.length === 1 ? "" : "s"}.`;
+      }
+
+      function importCustomThemes(file) {
+        if (!file) return;
+        if (file.size > 1024 * 1024) {
+          editorError.textContent = "Theme files must be smaller than 1 MB.";
+          return;
+        }
+        const reader = new FileReader();
+        reader.addEventListener("load", () => {
+          try {
+            const data = JSON.parse(String(reader.result));
+            if (!data || data.format !== "jikan-themes" || data.version !== 1 ||
+                !Array.isArray(data.themes) || data.themes.length < 1 || data.themes.length > 100 ||
+                !data.themes.every(validCustomTheme)) {
+              throw new TypeError("Choose a valid jiKAN theme export containing 1–100 custom themes.");
+            }
+            const previous = [...themes];
+            const ids = new Set(themes.map(theme => theme.id));
+            const imported = data.themes.map(theme => {
+              const copy = { ...theme };
+              if (ids.has(copy.id)) {
+                copy.id = `custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+              }
+              ids.add(copy.id);
+              return toCarouselTheme(copy);
+            });
+            themes.push(...imported);
+            if (!persistCustomThemes()) {
+              themes.splice(0, themes.length, ...previous);
+              return;
+            }
+            refreshManagedThemes();
+            updateThemeMeta();
+            editorError.textContent = `Imported ${imported.length} custom theme${imported.length === 1 ? "" : "s"}.`;
+          } catch (error) {
+            editorError.textContent = error instanceof SyntaxError
+              ? "That file is not valid JSON."
+              : error.message || "Could not import themes.";
+          }
+        });
+        reader.addEventListener("error", () => {
+          editorError.textContent = "Could not read the selected theme file.";
+        });
+        reader.readAsText(file);
       }
 
       function applyClockScale() {
@@ -2542,7 +3137,7 @@
         }
         document.getElementById("theme-glow").value = String(theme?.glow ?? 0);
         updateRangeTrack(document.getElementById("theme-glow"));
-        document.getElementById("theme-ambient").checked = Boolean(theme?.ambient ?? palette.ambient);
+        document.getElementById("theme-ambient").setAttribute("aria-checked", String(Boolean(theme?.ambient ?? palette.ambient)));
         editorError.textContent = "";
       }
 
@@ -2672,7 +3267,7 @@
           id: id || `custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
           name,
           glow: Number(document.getElementById("theme-glow").value),
-          ambient: document.getElementById("theme-ambient").checked
+          ambient: document.getElementById("theme-ambient").getAttribute("aria-checked") === "true"
         };
         for (const input of document.querySelectorAll("[data-color-prop]")) theme[input.dataset.colorProp] = input.value.toLowerCase();
         const invalidColors = colorProperties.filter(key => !validHex(theme[key]));
@@ -2770,7 +3365,7 @@
       }
 
       function controls() {
-        const fullscreenButton = `<button class="control-button icon-button" type="button" data-action="fullscreen" aria-label="Enter fullscreen" title="Fullscreen (F)">
+        const fullscreenButton = `<button class="control-button icon-button" type="button" data-action="fullscreen" aria-label="Enter fullscreen" title="Fullscreen (F)" aria-keyshortcuts="F">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4H4v4M16 4h4v4M20 16v4h-4M8 20H4v-4"/></svg><span>Fullscreen</span>
         </button>`;
         const screensaverButton = `<button class="control-button icon-button" type="button" data-action="screensaver" aria-label="Start screensaver" title="Screensaver">
@@ -2804,14 +3399,14 @@
         }
         panel.innerHTML = `<div class="control-stack">
           <div class="control-group mode-actions">
-            <button class="control-button primary action-button" type="button" data-action="toggle" title="${pauseLabel} timer (Space)">
+            <button class="control-button primary action-button" type="button" data-action="toggle" title="${pauseLabel} timer (Space)" aria-keyshortcuts="Space">
               <svg viewBox="0 0 24 24" aria-hidden="true">${active
                 ? '<path d="M8 5v14m8-14v14" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2.4"/>'
                 : '<path d="m8 5 12 7-12 7z" fill="currentColor"/>'
               }</svg>
               <span>${pauseLabel}</span>
             </button>
-            <button class="control-button action-button" type="button" data-action="reset" title="Reset">
+            <button class="control-button action-button" type="button" data-action="reset" title="Reset (R)" aria-keyshortcuts="R">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.34-5.66L4 8.67"/><path d="M4 4v4.67h4.67"/></svg>
               <span>${resetLabel}</span>
             </button>
@@ -2870,6 +3465,15 @@
         const duration = milliseconds => reducedMotion ? 1 : milliseconds;
         const outgoingOverlays = [];
         const buttonOffsets = new Map();
+        const animateButton = (button, keyframes, options) => {
+          const animation = button.animate(keyframes, { ...options, fill: "both" });
+          animation.onfinish = () => {
+            animation.cancel();
+            button.style.removeProperty("opacity");
+            button.style.removeProperty("transform");
+            requestAnimationFrame(() => button.style.removeProperty("transition"));
+          };
+        };
         const previousButtons = [...panel.querySelectorAll(".mode-actions [data-action]")];
         const previous = new Map(previousButtons.map(button => [
           button.dataset.action,
@@ -2931,12 +3535,17 @@
             const offsetY = prior.rect.top - rect.top;
             if (Math.abs(offsetX) > 1 || Math.abs(offsetY) > 1) {
               buttonOffsets.set(action, { x: offsetX, y: offsetY });
+              button.style.transition = "none";
               button.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
               button.style.opacity = ".82";
             }
           } else {
-            button.style.opacity = "0";
-            button.style.transform = "scale(.96)";
+            button.classList.add("mode-control-entering");
+            button.addEventListener("animationend", event => {
+              if (event.animationName === "mode-control-enter") {
+                button.classList.remove("mode-control-entering");
+              }
+            });
           }
         }
         if (nextSettings) {
@@ -2948,24 +3557,14 @@
         requestAnimationFrame(() => {
           for (const [action, button] of nextButtons) {
             const prior = previous.get(action);
-            let animation;
             if (prior) {
               const offset = buttonOffsets.get(action);
               if (!offset) continue;
-              animation = button.animate([
+              animateButton(button, [
                 { transform: `translate(${offset.x}px, ${offset.y}px)`, opacity: .82 },
                 { transform: "translate(0, 0)", opacity: 1 }
               ], { duration: duration(420), easing: "cubic-bezier(.22, 1, .36, 1)" });
-            } else {
-              animation = button.animate([
-                { opacity: 0, transform: "scale(.96)" },
-                { opacity: 1, transform: "scale(1)" }
-              ], { duration: duration(300), easing: "ease-out" });
             }
-            animation.onfinish = () => {
-              button.style.removeProperty("opacity");
-              button.style.removeProperty("transform");
-            };
           }
           for (const overlay of outgoingOverlays) {
             const keyframes = overlay.kind === "settings"
@@ -3000,10 +3599,15 @@
 
       function setMode(mode) {
         if (mode === state.mode) return;
-        const previousMode = state.mode;
         pauseActiveMode();
         state.mode = mode;
-        modeButtons.forEach(button => button.setAttribute("aria-pressed", String(button.dataset.mode === mode)));
+        modeButtons.forEach((button, index) => {
+          const selected = button.dataset.mode === mode;
+          button.setAttribute("aria-pressed", String(selected));
+          button.tabIndex = selected ? 0 : -1;
+          if (selected) modeIndicator.style.transform = `translateX(${index * 100}%)`;
+        });
+        persistSettings();
         transitionControls();
         applyClockScale();
         updateDisplay();
@@ -3254,10 +3858,36 @@
         }
       }
 
+      function playCompletionDing() {
+        const context = ensureAudioContext();
+        if (!context) return;
+        if (context.state === "suspended") {
+          context.resume().then(playCompletionDing).catch(error => {
+            console.warn("Could not resume jiKAN's completion chime.", error);
+          });
+          return;
+        }
+        const startedAt = context.currentTime;
+        const master = context.createGain();
+        master.gain.setValueAtTime(0.52, startedAt);
+        master.connect(context.destination);
+        for (const [frequency, level, decay] of [[987.77, .48, 1.55], [1481.66, .22, 1.2], [1975.53, .1, .9], [2963.3, .035, .62]]) {
+          const oscillator = context.createOscillator();
+          const envelope = context.createGain();
+          oscillator.type = "sine";
+          oscillator.frequency.setValueAtTime(frequency, startedAt);
+          envelope.gain.setValueAtTime(.0001, startedAt);
+          envelope.gain.exponentialRampToValueAtTime(level, startedAt + .008);
+          envelope.gain.exponentialRampToValueAtTime(.0001, startedAt + decay);
+          oscillator.connect(envelope);
+          envelope.connect(master);
+          oscillator.start(startedAt);
+          oscillator.stop(startedAt + decay + .02);
+        }
+      }
+
       function tick(scheduled = false) {
         const now = Date.now();
-        const timerIsRunning = state.mode === "timer" && state.timerDeadline !== null;
-        const pomodoroIsRunning = state.mode === "pomodoro" && state.pomDeadline !== null;
         if (state.mode === "clock") {
           const current = new Date();
           renderDigits(current.getHours() * 3600 + current.getMinutes() * 60 + current.getSeconds(), true);
@@ -3271,18 +3901,37 @@
         if (state.mode === "timer" && state.timerDeadline !== null) {
           state.timerRemaining = Math.max(0, Math.ceil((state.timerDeadline - now) / 1000));
           if (state.timerRemaining === 0) {
+            const completedAt = state.timerDeadline;
+            const duration = timerInitialDuration || durationFromInputs();
+            const startedAt = timerStartedAt || completedAt - duration * 1000;
             state.timerDeadline = null;
+            timerInitialDuration = 0;
+            timerStartedAt = 0;
+            recordFocusSessions([{ kind: "Timer", seconds: duration, startedAt, completedAt }]);
+            notifyTimerFinished("Timer complete", "Your countdown has finished.");
             controls();
           }
         } else if (state.mode === "pomodoro" && state.pomDeadline !== null) {
           let transitions = 0;
+          let lastCompletedPhase = "";
+          const completedSessions = [];
           while (state.pomDeadline <= now && transitions < 10000) {
+            const completedAt = state.pomDeadline;
+            lastCompletedPhase = state.pomPhase;
             if (state.pomPhase === "Work") {
+              const duration = currentPomDuration();
+              completedSessions.push({
+                kind: "Pomodoro",
+                seconds: duration,
+                startedAt: pomPhaseStartedAt || completedAt - duration * 1000,
+                completedAt
+              });
               state.workSessions++;
               state.pomPhase = state.workSessions % 4 === 0 ? "Long break" : "Short break";
             } else {
               state.pomPhase = "Work";
             }
+            pomPhaseStartedAt = completedAt;
             state.pomRemaining = currentPomDuration();
             if (state.pomRemaining <= 0) {
               state.pomDeadline = null;
@@ -3296,11 +3945,17 @@
           }
           state.pomRemaining = state.pomDeadline === null ? 0 : Math.max(0, Math.ceil((state.pomDeadline - now) / 1000));
           updateCaption();
-          if (transitions) controls();
+          if (transitions) {
+            recordFocusSessions(completedSessions);
+            const nextMessage = state.pomPhase === "Work" ? "Your break is over. Time to focus." : "Your work session is complete. Take a short break.";
+            notifyTimerFinished(lastCompletedPhase === "Work" ? "Focus session complete" : "Pomodoro break complete", nextMessage);
+            controls();
+          }
         }
         const tickKey = state.mode === "timer" ? `timer-${state.timerRemaining}`
           : `pomodoro-${state.pomRemaining}`;
-        if (scheduled && state.clockTickVolume > 0 && (timerIsRunning || pomodoroIsRunning) && tickKey !== lastTickKey) {
+        if (scheduled && document.hasFocus() && state.clockTickVolume > 0 &&
+            (state.timerDeadline !== null || state.pomDeadline !== null) && tickKey !== lastTickKey) {
           lastTickKey = tickKey;
           playAudioCue("tick");
         }
@@ -3310,7 +3965,6 @@
       let tickTimer = 0;
       function scheduleTick() {
         window.clearTimeout(tickTimer);
-        if (document.hidden) return;
         const now = Date.now();
         let delay = 1000 - now % 1000;
         const deadline = state.mode === "timer" ? state.timerDeadline : state.mode === "pomodoro" ? state.pomDeadline : null;
@@ -3334,7 +3988,15 @@
           pauseActiveMode();
         } else {
           if (state.timerRemaining === 0) state.timerRemaining = durationFromInputs();
-          if (state.timerRemaining > 0) state.timerDeadline = Date.now() + state.timerRemaining * 1000;
+          if (state.timerRemaining > 0) {
+            const now = Date.now();
+            if (!timerStartedAt) {
+              timerInitialDuration = state.timerRemaining;
+              timerStartedAt = now;
+            }
+            state.timerDeadline = now + state.timerRemaining * 1000;
+            requestBrowserNotificationPermission();
+          }
         }
         controls();
         updateDisplay();
@@ -3343,6 +4005,8 @@
       function resetTimer() {
         state.timerDeadline = null;
         state.timerRemaining = durationFromInputs();
+        timerInitialDuration = 0;
+        timerStartedAt = 0;
         controls();
         updateDisplay();
       }
@@ -3352,7 +4016,10 @@
           pauseActiveMode();
         } else {
           if (state.pomRemaining <= 0) state.pomRemaining = currentPomDuration();
-          state.pomDeadline = Date.now() + state.pomRemaining * 1000;
+          const now = Date.now();
+          if (!pomPhaseStartedAt && state.pomPhase === "Work") pomPhaseStartedAt = now;
+          state.pomDeadline = now + state.pomRemaining * 1000;
+          requestBrowserNotificationPermission();
         }
         controls();
         updateDisplay();
@@ -3363,6 +4030,7 @@
         state.pomPhase = "Work";
         state.workSessions = 0;
         state.pomRemaining = currentPomDuration();
+        pomPhaseStartedAt = 0;
         controls();
         updateDisplay();
       }
@@ -3409,10 +4077,13 @@
       let editingThemeId = "";
       function openThemeEditor() {
         window.clearTimeout(settingsCloseTimer);
+        window.cancelAnimationFrame(settingsOpenFrame);
         refreshManagedThemes(editingThemeId);
         fillThemeEditor(themes.find(theme => theme.id === editingThemeId));
         if (!themeEditor.open) themeEditor.showModal();
-        requestAnimationFrame(() => {
+        settingsOpenFrame = window.requestAnimationFrame(() => {
+          settingsOpenFrame = 0;
+          if (!themeEditor.open) return;
           themeEditor.classList.add("visible");
           settingsToggle.setAttribute("aria-expanded", "true");
         });
@@ -3420,8 +4091,11 @@
 
       function closeThemeEditor() {
         if (!themeEditor.open) return;
+        window.cancelAnimationFrame(settingsOpenFrame);
+        settingsOpenFrame = 0;
         if (!themeEditor.classList.contains("visible")) {
           window.clearTimeout(settingsCloseTimer);
+          settingsToggle.setAttribute("aria-expanded", "false");
           settingsCloseTimer = window.setTimeout(() => {
             if (themeEditor.open && !themeEditor.classList.contains("visible")) themeEditor.close();
           }, 430);
@@ -3529,8 +4203,8 @@
         if (!(event.target instanceof Element)) return;
         const control = event.target.closest("button, [role='option']");
         if (!control || control.disabled || control.getAttribute("aria-disabled") === "true") return;
-        if (control.matches(".theme-arrow, .settings-toggle, [data-action='close-editor']")) return;
-        if (control.matches(".mode-tab, [data-settings-tab], [data-hour-format]")) {
+        if (control.matches("#about-trigger, .theme-arrow, .settings-toggle, [data-action='close-editor']")) return;
+        if (control.matches(".mode-tab, [data-settings-tab], [data-hour-format], [data-history-range]")) {
           const selected = control.getAttribute("aria-pressed") === "true" || control.getAttribute("aria-selected") === "true";
           if (!selected) playAudioCue("slide");
           return;
@@ -3542,13 +4216,31 @@
         setMode(button.dataset.mode);
         scheduleTick();
       }));
-      aboutTrigger.addEventListener("click", openAboutCard);
+      modeTabs.addEventListener("keydown", event => {
+        const currentIndex = modeButtons.indexOf(document.activeElement);
+        if (currentIndex < 0) return;
+        let nextIndex = currentIndex;
+        if (event.key === "ArrowRight") nextIndex = (currentIndex + 1) % modeButtons.length;
+        else if (event.key === "ArrowLeft") nextIndex = (currentIndex - 1 + modeButtons.length) % modeButtons.length;
+        else if (event.key === "Home") nextIndex = 0;
+        else if (event.key === "End") nextIndex = modeButtons.length - 1;
+        else return;
+        event.preventDefault();
+        modeButtons[nextIndex].focus();
+        modeButtons[nextIndex].click();
+      });
+      aboutTrigger.addEventListener("click", () => {
+        playAudioCue("ui", aboutTrigger);
+        openAboutCard();
+      });
       updateButton.addEventListener("click", () => {
         if (updateAvailable && canInstallUpdate) installAvailableUpdate();
         else refreshUpdateCard();
       });
       aboutDialog.addEventListener("click", event => {
-        if (event.target === aboutDialog) closeAboutCard();
+        if (event.target === aboutDialog && !updateInstalling) {
+          closeAboutCard();
+        }
       });
       aboutDialog.addEventListener("cancel", event => {
         event.preventDefault();
@@ -3615,27 +4307,86 @@
       document.querySelector(".topbar-actions").addEventListener("click", event => {
         const action = event.target.closest("[data-action]")?.dataset.action;
         if (action === "theme-editor") {
-          playAudioCue("wipe");
+          playAudioCue("slide");
           if (themeEditor.open) closeThemeEditor();
           else openThemeEditor();
         }
       });
-      settingsTabs.forEach(tab => tab.addEventListener("click", () => selectSettingsTab(tab.dataset.settingsTab)));
-      selectSettingsTab("themes");
+      settingsTabs.forEach(tab => {
+        tab.addEventListener("click", () => selectSettingsTab(tab.dataset.settingsTab));
+        tab.addEventListener("keydown", event => {
+          const currentIndex = settingsTabs.indexOf(tab);
+          let nextIndex = currentIndex;
+          if (event.key === "ArrowRight") nextIndex = (currentIndex + 1) % settingsTabs.length;
+          else if (event.key === "ArrowLeft") nextIndex = (currentIndex - 1 + settingsTabs.length) % settingsTabs.length;
+          else if (event.key === "Home") nextIndex = 0;
+          else if (event.key === "End") nextIndex = settingsTabs.length - 1;
+          else return;
+          event.preventDefault();
+          selectSettingsTab(settingsTabs[nextIndex].dataset.settingsTab);
+          settingsTabs[nextIndex].focus();
+        });
+      });
+      selectSettingsTab("settings");
+      document.getElementById("theme-ambient").addEventListener("click", event => {
+        const toggle = event.currentTarget;
+        toggle.setAttribute("aria-checked", String(toggle.getAttribute("aria-checked") !== "true"));
+      });
+      document.getElementById("theme-import-file").addEventListener("change", event => {
+        importCustomThemes(event.currentTarget.files?.[0]);
+        event.currentTarget.value = "";
+      });
+      themeEditor.addEventListener("click", event => {
+        const action = event.target.closest("[data-action]")?.dataset.action;
+        if (action === "export-themes") exportCustomThemes();
+        if (action === "import-themes") themeImportFile.click();
+      });
+      historyToggle.addEventListener("click", () => {
+        state.trackFocusHistory = historyToggle.getAttribute("aria-checked") !== "true";
+        persistSettings();
+        updateFocusHistoryView();
+      });
+      historyRangeButtons.forEach((button, index) => {
+        button.addEventListener("click", () => {
+          focusHistoryRange = button.dataset.historyRange;
+          updateFocusHistoryView();
+        });
+        button.addEventListener("keydown", event => {
+          let nextIndex = index;
+          if (event.key === "ArrowRight") nextIndex = (index + 1) % historyRangeButtons.length;
+          else if (event.key === "ArrowLeft") nextIndex = (index - 1 + historyRangeButtons.length) % historyRangeButtons.length;
+          else if (event.key === "Home") nextIndex = 0;
+          else if (event.key === "End") nextIndex = historyRangeButtons.length - 1;
+          else return;
+          event.preventDefault();
+          historyRangeButtons[nextIndex].focus();
+          historyRangeButtons[nextIndex].click();
+        });
+      });
+      document.getElementById("clear-focus-history").addEventListener("click", () => {
+        focusHistory = [];
+        persistFocusHistory();
+        updateFocusHistoryView();
+      });
+      document.getElementById("dismiss-completion").addEventListener("click", () => {
+        window.clearTimeout(completionToastTimer);
+        completionToast.hidden = true;
+      });
       themeEditor.addEventListener("click", event => {
         if (event.target === themeEditor) {
-          playAudioCue("wipe");
+          playAudioCue("slide");
           closeThemeEditor();
         }
       });
       themeEditor.addEventListener("cancel", event => {
         event.preventDefault();
+        playAudioCue("slide");
         closeThemeEditor();
       });
       themeEditor.addEventListener("click", event => {
         const action = event.target.closest("[data-action]")?.dataset.action;
         if (action === "close-editor") {
-          playAudioCue("wipe");
+          playAudioCue("slide");
           closeThemeEditor();
         }
         if (action === "new-theme") {
@@ -3667,6 +4418,12 @@
         resetIdleTimer();
       });
       clockScaleControl.value = String(state.clockScale);
+      const themeGlowControl = document.getElementById("theme-glow");
+      [clockScaleControl, themeGlowControl].forEach(input => {
+        input.addEventListener("pointerdown", event => {
+          if (event.isPrimary && event.button === 0) playAudioCue("ui");
+        });
+      });
       document.querySelectorAll('input[type="range"]').forEach(input => {
         updateRangeTrack(input);
         input.addEventListener("input", () => updateRangeTrack(input));
@@ -3683,6 +4440,8 @@
       uiSoundsValue.textContent = uiSoundsValue.value;
       clockTickingValue.value = state.clockTickVolume ? `${state.clockTickVolume}%` : "Off";
       clockTickingValue.textContent = clockTickingValue.value;
+      updateRangeTrack(uiSoundsControl);
+      updateRangeTrack(clockTickingControl);
       uiSoundsControl.addEventListener("input", () => {
         state.uiSoundVolume = Number(uiSoundsControl.value);
         uiSoundsValue.value = state.uiSoundVolume ? `${state.uiSoundVolume}%` : "Off";
@@ -3735,14 +4494,27 @@
         if (state.mode === "timer") {
           state.timerConfig[input.dataset.duration] = safeInt(input, min);
           state.timerRemaining = durationFromInputs();
+          timerInitialDuration = 0;
+          timerStartedAt = 0;
         } else {
           state.pomConfig[input.dataset.duration] = safeInt(input, min);
           state.pomRemaining = currentPomDuration();
+          if (state.pomPhase === "Work") pomPhaseStartedAt = 0;
         }
         persistSettings();
         updateDisplay();
         scheduleTick();
       });
+      document.addEventListener("keydown", event => {
+        if (event.code !== "Space" || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (aboutDialog.open || state.screensaver || themeEditor.open || state.mode === "clock" || event.repeat) return;
+        registerActivity();
+        playAudioCue("ui", panel.querySelector('[data-action="toggle"]'));
+        state.mode === "timer" ? toggleTimer() : togglePomodoro();
+        scheduleTick();
+      }, true);
       document.addEventListener("keydown", event => {
         if (aboutDialog.open) {
           if (event.key === "Escape") {
@@ -3759,20 +4531,48 @@
         }
         if (event.key === "Escape" && themeEditor.open) {
           event.preventDefault();
+          playAudioCue("slide");
           closeThemeEditor();
           return;
         }
         registerActivity();
         if (event.altKey || event.ctrlKey || event.metaKey) return;
-        if (event.code === "Space" && !event.target.matches("input, textarea, select, [contenteditable='true']")) {
+        const target = event.target instanceof Element ? event.target : null;
+        const editable = target?.closest("input, textarea, select, [contenteditable='true']");
+        if (event.key.toLowerCase() === "s" && !editable && !event.repeat) {
           event.preventDefault();
-          if (event.repeat || state.mode === "clock" || themeEditor.open) return;
-          playAudioCue("ui", panel.querySelector('[data-action="toggle"]'));
-          state.mode === "timer" ? toggleTimer() : togglePomodoro();
+          settingsToggle.click();
+          return;
+        }
+        if (event.key === "?" && !editable) {
+          event.preventDefault();
+          announce("Shortcuts: 1–3 change modes · Space starts/pauses · R resets · F fullscreen · [ ] change themes · S settings · Esc closes.");
+          return;
+        }
+        if (themeEditor.open || editable) return;
+        if (/^[123]$/.test(event.key)) {
+          event.preventDefault();
+          const button = modeButtons[Number(event.key) - 1];
+          playAudioCue("slide");
+          button.focus();
+          setMode(button.dataset.mode);
           scheduleTick();
           return;
         }
-        if (event.key.toLowerCase() === "f" && !event.target.matches("input, textarea, select")) {
+        if (event.key === "[" || event.key === "]") {
+          event.preventDefault();
+          const direction = event.key === "[" ? -1 : 1;
+          setTheme(state.themeIndex + direction, direction);
+          return;
+        }
+        if (event.key.toLowerCase() === "r" && state.mode !== "clock") {
+          event.preventDefault();
+          playAudioCue("ui", panel.querySelector('[data-action="reset"]'));
+          state.mode === "timer" ? resetTimer() : resetPomodoro();
+          scheduleTick();
+          return;
+        }
+        if (event.key.toLowerCase() === "f") {
           event.preventDefault();
           playAudioCue("ui", panel.querySelector('[data-action="fullscreen"]'));
           state.fullscreen ? exitFullscreen() : enterFullscreen();
@@ -3810,7 +4610,6 @@
         if (document.hidden) {
           window.clearTimeout(idleTimer);
           idleTimer = 0;
-          window.clearTimeout(tickTimer);
           stopSaverAnimation();
           return;
         }
@@ -3829,6 +4628,13 @@
       updateThemeMeta();
       refreshManagedThemes();
       syncCustomSelect(managedTheme);
+      modeButtons.forEach((button, index) => {
+        const selected = button.dataset.mode === state.mode;
+        button.setAttribute("aria-pressed", String(selected));
+        button.tabIndex = selected ? 0 : -1;
+        if (selected) modeIndicator.style.transform = `translateX(${index * 100}%)`;
+      });
+      updateFocusHistoryView();
       controls();
       tick();
       scheduleTick();
